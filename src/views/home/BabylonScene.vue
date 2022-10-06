@@ -1,0 +1,278 @@
+<script lang="ts">
+import {
+  defineComponent,
+  toRaw,
+  onMounted,
+  ref,
+  shallowRef,
+  reactive,
+} from "vue";
+import { BabylonHandle } from "./BabylonHandle";
+import { directive } from "vue3-menus";
+import mitt from "./utils/bus";
+import { ElMessage, ElMessageBox } from "element-plus";
+export default defineComponent({
+  name: "BabylonOne",
+  props: ["formData"],
+  directives: {
+    menus: directive,
+  },
+  components: {},
+  setup(props, { emit }) {
+    const menus = shallowRef({
+      menus: [
+        {
+          label: "切换槽型",
+          // tip: 'Alt+向左箭头',
+          // click: () => {
+          //   window.history.back(-1);
+          // }
+          children: [
+            {
+              label: "矩形",
+              click: (e) => {
+                bbScene.createHole(400, 400, 18, "矩形");
+              },
+            },
+            {
+              label: "圆形",
+              click: (e) => {
+                bbScene.createHole(400, 400, 18, "圆形");
+              },
+            },
+          ],
+        },
+        {
+          label: "端面",
+          children: [
+            {
+              label: "添加斜面",
+              children: [
+                {
+                  label: "左斜面",
+                  click: () => {
+                    bbScene.createIncPlane('left','normal')
+                  },
+                },
+                {
+                  label: "左斜面梯形",
+                  click: () => {
+                    bbScene.createIncPlane('left','trape')
+                  },
+                },
+                {
+                  label: "左斜面长形",
+                  click: () => {
+                    bbScene.createIncPlane('left','long')
+                  },
+                },
+                {
+                  label: "右斜面",
+                  click: () => {
+                    bbScene.createIncPlane('right','normal')
+                  },
+                },
+                {
+                  label: "右斜面梯形",
+                  click: () => {
+                    bbScene.createIncPlane('right','trape')
+                  },
+                },
+                {
+                  label: "右斜面长形",
+                  click: () => {
+                    bbScene.createIncPlane('right','long')
+                  },
+                },
+              ],
+            },
+            {
+              label: "添加内槽",
+              children: [
+                {
+                  label: "前内槽",
+                  click: () => {
+                    bbScene.createInsideHole()
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        {
+          label: "开圆角",
+          click: () => {
+            bbScene.createFillet()
+          },
+        },
+      ],
+    });
+    let isCreate = ref<boolean>(false);
+    let view = ref<string>("");
+    let holeData = {};
+    let patterm = ref<string>("");
+
+    let bbScene
+    onMounted(() => {
+      const canvas = document.querySelector("canvas") as HTMLCanvasElement;
+      let obj = new BabylonHandle(canvas);
+      bbScene = obj
+
+      mitt.on("view", (res: any) => {
+        sendView(res);
+      });
+      mitt.on("patterm", (res: any) => {
+        changePat(res);
+      });
+    });
+    //获取长、宽、高
+    function getSizes() {
+      let { width, height, depth } = toRaw(props.formData);
+      let box = bbScene.createInitialBox(width, height, depth);
+      isCreate.value = true;
+    }
+
+    function changeBSize() {
+      let { width, height, depth, material, hole } = toRaw(props.formData);
+      if (material != "") {
+        // let mat = getAssetsImages(material) + ".png";
+        // bbScene.changeBox(width, height, depth, mat);
+      }
+      //   bbScene.changeBox(width, height, depth);
+
+      let { hWidth, hDepth, x, y } = hole;
+      if (hole.hDepth != "") {
+        // bbScene.createCSG(hWidth, hDepth, x, y);
+      }
+
+      holeData = hole;
+
+      return true;
+    }
+
+    // function getAssetsImages(name: any) {
+    //   return new URL(`/src/assets/images/${name}`, import.meta.url).href;
+    // }
+
+    function sendView(val: any) {
+      let alpha = -1;
+      let beta = -1;
+      // let sendview = view
+      switch (val) {
+        case "俯视":
+          beta = 0;
+          break;
+        case "正视":
+          beta = Math.PI / 2;
+          break;
+        case "左侧":
+          alpha = Math.PI;
+          break;
+        case "右侧":
+          alpha = 0;
+          break;
+        case "背部":
+          alpha = Math.PI / 2;
+          break;
+        case "底部":
+          beta = Math.PI;
+          break;
+      }
+        bbScene.changeView({ alpha, beta });
+    }
+
+    function changePat(val: string) {
+        val == "编辑模式" && bbScene.editPatterm();
+      if (val == "实体模式") {
+        ElMessageBox.confirm("是否切换为实体模式？", "提示", {
+          confirmButtonText: "确认",
+          cancelButtonText: "取消",
+          type: "warning",
+        })
+          .then(() => {
+            ElMessage({
+              type: "success",
+              message: "切换成功",
+            });
+            bbScene.createCSG()
+          })
+          .catch(() => {
+            ElMessage({
+              type: "info",
+              message: "取消切换",
+            });
+          });
+      }
+    }
+
+    return {
+      getSizes,
+      changeBSize,
+      view,
+      sendView,
+      changePat,
+      isCreate,
+      patterm,
+      menus,
+    };
+  },
+});
+</script>
+
+<template>
+  <el-radio-group v-model="patterm" class="radioBox" @change="changePat">
+    <el-row class="w100">
+      <el-col :span="12"> <el-radio-button label="编辑模式"/></el-col>
+      <el-col :span="12"><el-radio-button label="实体模式"/></el-col>
+    </el-row>
+  </el-radio-group>
+  <canvas ref="bjsCanvas" v-menus:right="menus"></canvas>
+</template>
+
+<style>
+.el-radio-group {
+  position: absolute;
+  top: -45px;
+  right: 45%;
+  z-index: 9999;
+}
+.el-radio-button__inner{
+  margin-right: 15px;
+}
+canvas {
+  /* width: 1600px;
+      height: 850px; */
+  width: 100%;
+  /* width: calc(100vw - 220px); */
+  height: calc(100vh - 54px);
+  position: relative;
+}
+.patterm {
+  margin-left: 15px;
+  margin-right: 15px;
+}
+.el-button--text {
+  margin-right: 15px;
+}
+.el-select {
+  width: 300px;
+}
+.el-input {
+  width: 300px;
+}
+.dialog-footer button:first-child {
+  margin-right: 10px;
+}
+.rightMenu {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  left: 50%;
+  top: 50%;
+  margin-left: -150px;
+  margin-top: -150px;
+}
+.el-message-box {
+  margin-top: -100px;
+}
+</style>
