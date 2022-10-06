@@ -16,7 +16,7 @@ const permissionList=[
         "name":"order-manage",
         "meta":{
             "icon": "el-icon-place",
-            "name": "模拟权限1",
+            "name": "有屋权限1",
         },
         "children": [
             {
@@ -57,7 +57,7 @@ const permissionList=[
         "name":"cproduct-manage",
         "meta":{
             "icon": "el-icon-place",
-            "name": "模拟权限2",
+            "name": "有屋权限2",
         },
         "children": [
             {
@@ -77,7 +77,7 @@ const permissionList=[
         "name":"statistics-list",
         "meta":{
             "icon": "el-icon-place",
-            "name": "模拟权限3",
+            "name": "有屋权限3",
         },
        
     }

@@ -32,7 +32,7 @@ import {
     height: number;
     depth: number;
     box: Mesh;
-    matPath: string = "http://localhost:8080/src/assets/images/mat1.png";
+    // matPath: string = "http://localhost:8080/src/assets/images/mat1.png";
     boxMaterial;
     newMesh;
     camera: ArcRotateCamera;
@@ -89,18 +89,10 @@ import {
   
       let boxMaterial = new BABYLON.StandardMaterial("boxMaterial", this.scene);
       // boxMaterial.diffuseTexture = new BABYLON.Texture(this.matPath, this.scene);
-      boxMaterial.diffuseTexture = new BABYLON.Texture(this.matPath, this.scene);
+      boxMaterial.diffuseTexture = new BABYLON.Texture('https://img0.baidu.com/it/u=3722085479,542006090&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=600', this.scene);
       this.boxMaterial = boxMaterial;
 
       scene.onPointerDown = function (evt, pickResult) {
-        // // if the click hits the ground object, we change the impact position
-        // var indices = pickResult.pickedMesh?.getIndices();
-        // //因为3d物体的面facet是一个三角形，所以由3个顶点决定。
-        // var index0 = indices![pickResult.faceId * 3];
-        // var index1 = indices![pickResult.faceId * 3 + 1];
-        // var index2 = indices![pickResult.faceId * 3 + 2];
-        // console.log(index0,index1,index2);
-        // console.log(evt,pickResult);
       };
   
       let isRightPick: boolean;
@@ -186,6 +178,7 @@ import {
       //创建槽BOX
       this.createHole(400, 400, 18, "矩形");
   
+      return
       //创建可输入面板
       this.createHoleGUI(this.editHoleBox);
   
@@ -531,6 +524,10 @@ import {
       //创建可输入槽距数据展示
       let mesAdvancedTexture =
         AdvancedDynamicTexture.CreateFullscreenUI("mesAdvancedTexture");
+
+        console.log(mesAdvancedTexture);
+        return
+        
   
       let rectx = new Rectangle();
       rectx.width = "50px";
@@ -934,6 +931,8 @@ import {
       polygon.material = holeMaterial;
       this.editHoleBox = polygon;
       this.createGrooMeasureLine();
+
+      return
       this.createHoleGUI(this.editHoleBox);
   
       let ind = this.holeArr.indexOf(this.editHoleBox);
