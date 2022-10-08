@@ -7,9 +7,9 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
-    "@babylonjs/core": "^5.7.0",
+    "@babylonjs/core": "^4.2.0",
+    "@babylonjs/gui": "^4.2.0",
     "axios": "^0.21.1",
-    "babylonjs-gui": "^4.0.3",
     "codemirror": "^5.62.0",
     "earcut": "^2.2.4",
     "echarts": "^5.1.2",

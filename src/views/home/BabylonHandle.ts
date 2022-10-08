@@ -22,7 +22,7 @@ import {
     Line,
     InputText,
     MultiLine,
-  } from "babylonjs-gui";
+  } from "@babylonjs/gui";
   import earcut from "earcut";
   import { ElMessage, ElMessageBox } from "element-plus";
   export class BabylonHandle {
@@ -98,8 +98,8 @@ import {
       let isRightPick: boolean;
       scene.onPointerPick = function (e, p) {
         //案件e.inputIndex 值为2（左键） 值为4（右键）
-        if (e.inputIndex == 4) {
-        }
+        // if (e.inputIndex == 4) {
+        // }
       };
   
       //监听鼠标点击事件
@@ -178,7 +178,6 @@ import {
       //创建槽BOX
       this.createHole(400, 400, 18, "矩形");
   
-      return
       //创建可输入面板
       this.createHoleGUI(this.editHoleBox);
   
@@ -329,6 +328,8 @@ import {
     panelAdvancedTexture: AdvancedDynamicTexture;
     //创建用户交互槽
     createHoleGUI(mesh) {
+      console.log(mesh);
+      
       this.panelAdvancedTexture && this.panelAdvancedTexture.dispose();
       var panelAdvancedTexture = AdvancedDynamicTexture.CreateFullscreenUI("UI");
   
@@ -450,7 +451,6 @@ import {
       panel.linkWithMesh(mesh);
       panel.linkOffsetY = panelOffY;
       panel.linkOffsetX = panelOffX;
-      panel.zIndex = 1;
       panel.alpha = 0.5;
   
       //标注点
@@ -525,10 +525,6 @@ import {
       let mesAdvancedTexture =
         AdvancedDynamicTexture.CreateFullscreenUI("mesAdvancedTexture");
 
-        console.log(mesAdvancedTexture);
-        return
-        
-  
       let rectx = new Rectangle();
       rectx.width = "50px";
       rectx.height = "20px";
@@ -925,14 +921,13 @@ import {
       const polygon = poly.build(true, height + 0.5);
       polygon.parent = this.editBox;
       polygon.position.y = this.height / 2 + 0.5;
-      let holeMaterial = new BABYLON.StandardMaterial("holeMaterial");
+      let holeMaterial = new BABYLON.StandardMaterial("holeMaterial",this.scene);
       holeMaterial.diffuseColor = new BABYLON.Color3(255, 255, 0);
       holeMaterial.alpha = 0.5;
       polygon.material = holeMaterial;
       this.editHoleBox = polygon;
       this.createGrooMeasureLine();
 
-      return
       this.createHoleGUI(this.editHoleBox);
   
       let ind = this.holeArr.indexOf(this.editHoleBox);
@@ -1053,7 +1048,7 @@ import {
       x: number = 30,
       y: number = 18
     ) {
-      let incMaterial = new BABYLON.StandardMaterial("holeMaterial");
+      let incMaterial = new BABYLON.StandardMaterial("holeMaterial",this.scene);
       incMaterial.diffuseColor = new BABYLON.Color3(0, 0, 255);
       incMaterial.alpha = 0.5;
       this.incMaterial = incMaterial;
@@ -1139,7 +1134,7 @@ import {
         this.height / 2 - height / 2,
         -this.depth / 2 + depth / 2
       );
-      let incMaterial = new BABYLON.StandardMaterial("holeMaterial");
+      let incMaterial = new BABYLON.StandardMaterial("holeMaterial",this.scene);
       incMaterial.diffuseColor = new BABYLON.Color3(0, 0, 255);
       incMaterial.alpha = 0.5;
       insideHole.material = incMaterial;
