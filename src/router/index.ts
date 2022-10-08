@@ -69,12 +69,12 @@ export const DynamicRoutes = [
         },
         children: [
             {
-                path: "home",
-                component: () => import("@/views/home/show.vue"),
-                name: "home",
+                path: "board",
+                component: () => import("@/views/board/empyBoard.vue"),
+                name: "board",
                 meta: {
                     name: "板材编辑",
-                    icon: "el-icon-s-home",
+                    icon: "el-icon-document",
                 },
             },
             // {

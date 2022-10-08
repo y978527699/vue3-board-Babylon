@@ -7,13 +7,12 @@ import {
   shallowRef,
   reactive,
 } from "vue";
-import { BabylonHandle } from "./BabylonHandle";
+import { BabylonHandle } from "./core/BabylonHandle";
 import { directive } from "vue3-menus";
-import mitt from "./utils/bus";
+import bus from "./utils/bus";
 import { ElMessage, ElMessageBox } from "element-plus";
 export default defineComponent({
   name: "BabylonOne",
-  props: ["formData"],
   directives: {
     menus: directive,
   },
@@ -111,44 +110,48 @@ export default defineComponent({
     let view = ref<string>("");
     let holeData = {};
     let patterm = ref<string>("");
-
+      let formData = reactive({})
     let bbScene
     onMounted(() => {
       const canvas = document.querySelector("canvas") as HTMLCanvasElement;
       let obj = new BabylonHandle(canvas);
       bbScene = obj
 
-      mitt.on("view", (res: any) => {
+      bus.on('boxSize',(res: any) => {
+        getSizes(res)
+      })
+
+      bus.on("view", (res: any) => {
         sendView(res);
       });
-      mitt.on("patterm", (res: any) => {
+      bus.on("patterm", (res: any) => {
         changePat(res);
       });
     });
     //获取长、宽、高
-    function getSizes() {
-      let { width, height, depth } = toRaw(props.formData);
+    function getSizes(val) {
+      let { width, height, depth } = {...val} as any;
       let box = bbScene.createInitialBox(width, height, depth);
       isCreate.value = true;
     }
 
-    function changeBSize() {
-      let { width, height, depth, material, hole } = toRaw(props.formData);
-      if (material != "") {
-        // let mat = getAssetsImages(material) + ".png";
-        // bbScene.changeBox(width, height, depth, mat);
-      }
-      //   bbScene.changeBox(width, height, depth);
+    // function changeBSize() {
+    //   let { width, height, depth, material, hole } = formData as any;
+    //   if (material != "") {
+    //     // let mat = getAssetsImages(material) + ".png";
+    //     // bbScene.changeBox(width, height, depth, mat);
+    //   }
+    //   //   bbScene.changeBox(width, height, depth);
 
-      let { hWidth, hDepth, x, y } = hole;
-      if (hole.hDepth != "") {
-        // bbScene.createCSG(hWidth, hDepth, x, y);
-      }
+    //   let { hWidth, hDepth, x, y } = hole;
+    //   if (hole.hDepth != "") {
+    //     // bbScene.createCSG(hWidth, hDepth, x, y);
+    //   }
 
-      holeData = hole;
+    //   holeData = hole;
 
-      return true;
-    }
+    //   return true;
+    // }
 
     // function getAssetsImages(name: any) {
     //   return new URL(`/src/assets/images/${name}`, import.meta.url).href;
@@ -207,7 +210,7 @@ export default defineComponent({
 
     return {
       getSizes,
-      changeBSize,
+      // changeBSize,
       view,
       sendView,
       changePat,

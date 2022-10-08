@@ -1,7 +1,5 @@
 <template>
     <div class="wrap">
-      <babylon-scene :formData="formData" ref="babyLons"></babylon-scene>
-  
       <div class="buildWrap" v-if="isBuild">
         <el-card class="box-card">
           <template #header>
@@ -23,7 +21,7 @@
             </el-form>
           </div>
           <div class="btnWrap">
-            <el-button type="primary" class="buildBtn" @click="buildBox"
+            <el-button type="primary" class="buildBtn" @click="buildBox(formData)"
               >点击创建</el-button
             >
           </div>
@@ -34,8 +32,9 @@
   
   <script lang="ts">
   import { defineComponent, ref, reactive, toRaw } from "vue";
-  import BabylonScene from "./BabylonScene.vue";
+  import BabylonScene from "../BabylonScene.vue";
   import { ElMessage } from "element-plus";
+  import bus from "../utils/bus";
   export default defineComponent({
     components: {
       BabylonScene,
@@ -73,26 +72,15 @@
     //     return new URL(`/src/assets/images/${name}`, import.meta.url).href;
     //   }
   
-      let babyLons = ref();
-      function buildBox() {
-        isBuild.value = false;
-        //调用子组件打印传过去的值
-        babyLons.value.getSizes();
-      }
-  
-      function changeSize() {
-        if (babyLons.value.changeBSize()) {
-          ElMessage({
-            message: "应用成功!",
-            type: "success",
-          });
-        }
-      }
-  
     //   function changeCheck(order, img) {
     //     checkCard.value = order;
     //     formData.material = img;
     //   }
+
+    function buildBox(val){
+      bus.emit('boxSize',val)
+      isBuild.value = false
+    }
   
       return {
         isBuild,
@@ -105,13 +93,11 @@
         formData,
         editData,
         // getAssetsImages,
-        buildBox,
-        babyLons,
-        changeSize,
         ischeck,
         checkCard,
         // changeCheck,
         holeActive,
+        buildBox
       };
     },
   });
@@ -199,8 +185,8 @@
     width: 360px;
     position: absolute;
     top: 50%;
-    left: 50%;
-    margin: -180px 0 0 -180px;
+    left: 50%; 
+     margin: -180px 0 0 -180px;
   }
   .btnWrap {
     width: 100%;
