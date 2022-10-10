@@ -1,11 +1,9 @@
 <script lang="ts">
 import {
   defineComponent,
-  toRaw,
   onMounted,
   ref,
   shallowRef,
-  reactive,
 } from "vue";
 import { BabylonHandle } from "./core/BabylonHandle";
 import { directive } from "vue3-menus";
@@ -17,7 +15,7 @@ export default defineComponent({
     menus: directive,
   },
   components: {},
-  setup(props, { emit }) {
+  setup() {
     const menus = shallowRef({
       menus: [
         {
@@ -104,16 +102,22 @@ export default defineComponent({
             bbScene.createFillet()
           },
         },
+        {
+          label: "编辑参数",
+          click: () => {
+            isShow.value = !isShow.value
+            bus.emit('plane',isShow.value)
+          }
+        }
       ],
     });
+    let isShow = ref(false)
     let isCreate = ref<boolean>(false);
     let view = ref<string>("");
-    let holeData = {};
     let patterm = ref<string>("");
-      let formData = reactive({})
     let bbScene
     onMounted(() => {
-      const canvas = document.querySelector("canvas") as HTMLCanvasElement;
+      const canvas = document.getElementById("canvas1") as HTMLCanvasElement;
       let obj = new BabylonHandle(canvas);
       bbScene = obj
 
@@ -127,7 +131,11 @@ export default defineComponent({
       bus.on("patterm", (res: any) => {
         changePat(res);
       });
+      bus.on("createPart",() => {
+        bbScene.createPart()
+      })
     });
+
     //获取长、宽、高
     function getSizes(val) {
       let { width, height, depth } = {...val} as any;
@@ -184,7 +192,7 @@ export default defineComponent({
         bbScene.changeView({ alpha, beta });
     }
 
-    function changePat(val: string) {
+    function changePat(val) {
         val == "编辑模式" && bbScene.editPatterm();
       if (val == "实体模式") {
         ElMessageBox.confirm("是否切换为实体模式？", "提示", {
@@ -229,7 +237,7 @@ export default defineComponent({
       <el-col :span="12"><el-radio-button label="实体模式"/></el-col>
     </el-row>
   </el-radio-group>
-  <canvas ref="bjsCanvas" v-menus:right="menus"></canvas>
+  <canvas id="canvas1" ref="bjsCanvas" v-menus:right="menus"></canvas>
 </template>
 
 <style>
@@ -243,10 +251,7 @@ export default defineComponent({
   margin-right: 15px;
 }
 canvas {
-  /* width: 1600px;
-      height: 850px; */
   width: 100%;
-  /* width: calc(100vw - 220px); */
   height: calc(100vh - 54px);
   position: relative;
 }

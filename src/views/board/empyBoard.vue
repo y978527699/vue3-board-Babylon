@@ -1,5 +1,6 @@
 <template>
   <div class="wrap">
+    <!-- <Preview></Preview> -->
     <BoxDialog class="BoxDialog"></BoxDialog>
     <BabylonScene></BabylonScene>
     <PanelHandle></PanelHandle>
@@ -10,8 +11,13 @@
 import BoxDialog from "./tools/boxDialog.vue";
 import BabylonScene from "./BabylonScene.vue";
 import PanelHandle from './tools/panelHandle'
+import Preview from './tools/preview/preview.vue'
 export default {
-  components: { BoxDialog, BabylonScene,PanelHandle },
+  components: { BoxDialog, BabylonScene,PanelHandle,Preview },
+  setup(){
+    return {
+    }
+  }
 };
 </script>
 

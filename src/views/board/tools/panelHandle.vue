@@ -1,14 +1,5 @@
 <template>
   <div class="menuWrap">
-    <el-button
-      @click="drawer = true"
-      type="primary"
-      style="margin-left: 16px"
-      class="openBtn"
-    >
-      编辑板材
-    </el-button>
-
     <!-- 查看当前参数小卡片 -->
     <!-- <el-popover placement="left" :width="250" trigger="click">
         <el-row type="flex" align="middle">
@@ -70,7 +61,7 @@
           >编辑</el-button
         > -->
         <el-tabs v-model="tableName">
-          <el-tab-pane label="参数" name="first">
+          <el-tab-pane label="参数" name="parameter">
             <el-collapse v-model="collName" accordion>
               <el-collapse-item title="常用" name="1">
                 <div>
@@ -83,36 +74,6 @@
                   <el-input v-model="formData.height">
                     <template #prepend>厚度</template>
                   </el-input>
-                  <!-- <el-form :model="formData.hole" label-width="120px">
-                        <el-form-item label="长度">
-                          <el-input v-model="formData.depth" />
-                        </el-form-item>
-                        <el-form-item label="宽度">
-                          <el-input v-model="formData.width" />
-                        </el-form-item>
-                        <el-form-item label="厚度">
-                          <el-input v-model="formData.height" />
-                        </el-form-item>
-                      </el-form> -->
-                  <!-- <el-input
-                        v-model="formData.hole.hDepth"
-                      >
-                        <template #prepend>长度：</template>
-                      </el-input>
-                  <el-row>
-                    <el-col :span="12">宽度：</el-col>
-                    <el-col :span="12">
-                      <span v-if="!isEdit">{{ formData.width }}</span>
-                      <el-input v-model="formData.width" v-else></el-input>
-                    </el-col>
-                  </el-row>
-                  <el-row>
-                    <el-col :span="12">厚度：</el-col>
-                    <el-col :span="12">
-                      <span v-if="!isEdit">{{ formData.height }}</span>
-                      <el-input v-model="formData.height" v-else></el-input>
-                    </el-col>
-                  </el-row> -->
                 </div>
               </el-collapse-item>
               <el-collapse-item title="开槽" name="2">
@@ -124,20 +85,12 @@
                   >
                     <el-tab-pane label="尺寸" name="first">
                       <el-form :model="formData.hole" label-width="120px">
-                        <!-- <el-form-item label="长度">
-                          <span v-if="!isEdit">{{ formData.hole.hDepth }}</span>
-                          <el-input v-model="formData.hole.hDepth" v-else />
-                        </el-form-item> -->
                         <el-input v-model="formData.hole.hDepth">
                           <template #prepend>长度</template>
                         </el-input>
                         <el-input v-model="formData.hole.hDepth">
                           <template #prepend>宽度</template>
                         </el-input>
-                        <!-- <el-form-item label="宽度">
-                          <span v-if="!isEdit">{{ formData.hole.hWidth }}</span>
-                          <el-input v-model="formData.hole.hWidth" v-else />
-                        </el-form-item> -->
                       </el-form>
                     </el-tab-pane>
                     <el-tab-pane label="位置" name="second">
@@ -157,9 +110,9 @@
               <el-collapse-item title="材料" name="4"> </el-collapse-item>
             </el-collapse>
           </el-tab-pane>
-          <el-tab-pane label="产品" name="second">产品类别</el-tab-pane>
-          <el-tab-pane label="封边" name="third">封边类别</el-tab-pane>
-          <el-tab-pane label="材料" name="fourth" id="material">
+          <el-tab-pane label="产品" name="product">产品类别</el-tab-pane>
+          <el-tab-pane label="封边" name="edgeBanding">封边类别</el-tab-pane>
+          <el-tab-pane label="材料" name="material" id="material">
             <div class="matCard">
               <el-card :body-style="{ padding: '0px' }">
                 <!-- <img
@@ -168,9 +121,9 @@
                     style="width: 65px; height: 90px"
                   /> -->
                 <div style="padding: 20px 0 20px 35px">
-                  <span style="font: bold 15px '微软雅黑'">材料1</span>
+                  <span style="font: bold 15px 微软雅黑">材料1</span>
                   <div class="bottom">
-                    <span style="font: 10px '微软雅黑'">该材质型号为001</span>
+                    <span style="font: 10px 微软雅黑">该材质型号为001</span>
                   </div>
                   <el-button
                     type="primary"
@@ -197,9 +150,9 @@
                     style="width: 65px; height: 90px"
                   /> -->
                 <div style="padding: 20px 0 20px 35px">
-                  <span style="font: bold 15px '微软雅黑'">材料2</span>
+                  <span style="font: bold 15px 微软雅黑">材料2</span>
                   <div class="bottom">
-                    <span style="font: 10px '微软雅黑'">该材质型号为002</span>
+                    <span style="font: 10px 微软雅黑">该材质型号为002</span>
                   </div>
                   <el-button
                     type="primary"
@@ -226,9 +179,9 @@
               ></el-image
             > -->
                 <div style="padding: 20px 0 20px 35px">
-                  <span style="font: bold 15px '微软雅黑'">材料3</span>
+                  <span style="font: bold 15px 微软雅黑">材料3</span>
                   <div class="bottom">
-                    <span style="font: 10px '微软雅黑'">该材质型号为003</span>
+                    <span style="font: 10px 微软雅黑">该材质型号为003</span>
                   </div>
                   <el-button
                     type="primary"
@@ -249,6 +202,37 @@
                 </div>
               </el-card>
             </div>
+          </el-tab-pane>
+          <el-tab-pane label="配件" name="parts" id="parts">
+            <el-card :body-style="{ padding: '0px' }">
+              <el-image
+                style="width: 100px; height: 120px"
+                :src="url"
+                fit="cover"
+                @click="imgClick"
+              />
+              <div style="padding: 35px 0px 20px 15px">
+                <span style="font: bold 15px 微软雅黑">配件管1</span>
+                <div class="bottom">
+                  <span style="font: 10px 微软雅黑">该材质型号为001</span>
+                </div>
+                <el-button
+                  type="primary"
+                  class="materialBtn"
+                  plain
+                  v-show="!partCheck"
+                  @click="createPart()"
+                  >应用配件</el-button
+                >
+                <el-button
+                  type="success"
+                  class="materialBtn"
+                  v-show="partCheck"
+                  text
+                  >已选择</el-button
+                >
+              </div>
+            </el-card>
           </el-tab-pane>
         </el-tabs>
       </div>
@@ -276,20 +260,22 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, reactive, toRaw } from "vue";
-import { ElMessage } from "element-plus";
+import { defineComponent, ref, reactive, onMounted } from "vue";
+import bus from "../utils/bus";
+import Preview from './preview/preview.vue'
 export default defineComponent({
-  components: {},
+  components: {Preview},
   setup() {
+    // let isPreview = ref<boolean>(false)
+    let partCheck = ref<boolean>(false)
+    let url = require('@/static/images/partPipe.jpg')
     let holeActive = ref<string>("first");
     let checkCard = ref<number>(0);
-    let ischeck = ref<boolean>(false);
-    let isBuild = ref<boolean>(true);
     let isEdit = ref<boolean>(false);
     let drawer = ref<boolean>(false); //抽屉
     let applyBtn = ref<boolean>(true);
     const collName = ref(["1"]); //折叠面板
-    const tableName = ref("first"); //tabs切换
+    const tableName = ref("parameter"); //tabs切换
     const form = reactive({});
     const formData = reactive({
       height: 18,
@@ -304,6 +290,15 @@ export default defineComponent({
         y: 0,
       },
     });
+
+    function createPart(){
+      bus.emit('createPart')
+    }
+
+    function imgClick(){
+      // isPreview.value = !isPreview.value
+    }
+
     function editData() {
       isEdit.value = true;
       applyBtn.value = false;
@@ -314,30 +309,27 @@ export default defineComponent({
 
     // }
 
-    let babyLons = ref();
-    function buildBox() {
-      isBuild.value = false;
-      //调用子组件打印传过去的值
-      babyLons.value.getSizes();
-    }
-
-    function changeSize() {
-        console.log(formData)
-      if (babyLons.value.changeBSize()) {
-        ElMessage({
-          message: "应用成功!",
-          type: "success",
-        });
-      }
-    }
-
     function changeCheck(order, img) {
       checkCard.value = order;
       formData.material = img;
     }
 
+    function changeSize() {
+      console.log("111");
+    }
+
+    onMounted(() => {
+      bus.on("plane", (val: any) => {
+        drawer.value = !drawer.value;
+      });
+    });
+
     return {
-      isBuild,
+      // isPreview,
+      createPart,
+      imgClick,
+      partCheck,
+      url,
       isEdit,
       drawer,
       applyBtn,
@@ -346,14 +338,10 @@ export default defineComponent({
       form,
       formData,
       editData,
-        // getAssetsImages,
-      buildBox,
-      babyLons,
-      changeSize,
-      ischeck,
       checkCard,
       changeCheck,
       holeActive,
+      changeSize,
     };
   },
 });
@@ -419,10 +407,7 @@ export default defineComponent({
   top: 30px;
   border-radius: 5px;
 }
-.rowFlex {
-  /* display: flex;
-    justify-content: space-around; */
-}
+
 .el-drawer__body {
   padding: 0 10px !important;
 }
@@ -432,21 +417,13 @@ export default defineComponent({
 .namePos {
   margin: 55px 10px;
 }
-.buildWrap {
-  width: 360px;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  margin: -180px 0 0 -180px;
-}
+
 .btnWrap {
   width: 100%;
   padding-top: 20px;
   text-align: center;
 }
-.buildBtn {
-  width: 130px;
-}
+
 .el-form-item__content {
   flex: 0.5 !important;
 }
@@ -484,5 +461,9 @@ export default defineComponent({
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+#parts .el-card__body{
+  display: flex;
+  margin-top: 5px;
 }
 </style>
