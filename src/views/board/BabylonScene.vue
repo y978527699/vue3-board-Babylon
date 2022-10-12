@@ -1,10 +1,5 @@
 <script lang="ts">
-import {
-  defineComponent,
-  onMounted,
-  ref,
-  shallowRef,
-} from "vue";
+import { defineComponent, onMounted, ref, shallowRef } from "vue";
 import { BabylonHandle } from "./core/BabylonHandle";
 import { directive } from "vue3-menus";
 import bus from "./utils/bus";
@@ -48,37 +43,37 @@ export default defineComponent({
                 {
                   label: "左斜面",
                   click: () => {
-                    bbScene.createIncPlane('left','normal')
+                    bbScene.createIncPlane("left", "normal");
                   },
                 },
                 {
                   label: "左斜面梯形",
                   click: () => {
-                    bbScene.createIncPlane('left','trape')
+                    bbScene.createIncPlane("left", "trape");
                   },
                 },
                 {
                   label: "左斜面长形",
                   click: () => {
-                    bbScene.createIncPlane('left','long')
+                    bbScene.createIncPlane("left", "long");
                   },
                 },
                 {
                   label: "右斜面",
                   click: () => {
-                    bbScene.createIncPlane('right','normal')
+                    bbScene.createIncPlane("right", "normal");
                   },
                 },
                 {
                   label: "右斜面梯形",
                   click: () => {
-                    bbScene.createIncPlane('right','trape')
+                    bbScene.createIncPlane("right", "trape");
                   },
                 },
                 {
                   label: "右斜面长形",
                   click: () => {
-                    bbScene.createIncPlane('right','long')
+                    bbScene.createIncPlane("right", "long");
                   },
                 },
               ],
@@ -89,7 +84,7 @@ export default defineComponent({
                 {
                   label: "前内槽",
                   click: () => {
-                    bbScene.createInsideHole()
+                    bbScene.createInsideHole();
                   },
                 },
               ],
@@ -99,31 +94,32 @@ export default defineComponent({
         {
           label: "开圆角",
           click: () => {
-            bbScene.createFillet()
+            bbScene.createFillet();
           },
         },
         {
           label: "编辑参数",
           click: () => {
-            isShow.value = !isShow.value
-            bus.emit('plane',isShow.value)
-          }
-        }
+            isShow.value = !isShow.value;
+            bus.emit("plane", isShow.value);
+          },
+        },
       ],
     });
-    let isShow = ref(false)
+    let isShow = ref(false);
     let isCreate = ref<boolean>(false);
     let view = ref<string>("");
     let patterm = ref<string>("");
-    let bbScene
+    let canSave = ref<boolean>(false);
+    let bbScene;
     onMounted(() => {
       const canvas = document.getElementById("canvas1") as HTMLCanvasElement;
       let obj = new BabylonHandle(canvas);
-      bbScene = obj
+      bbScene = obj;
 
-      bus.on('boxSize',(res: any) => {
-        getSizes(res)
-      })
+      bus.on("boxSize", (res: any) => {
+        getSizes(res);
+      });
 
       bus.on("view", (res: any) => {
         sendView(res);
@@ -131,14 +127,14 @@ export default defineComponent({
       bus.on("patterm", (res: any) => {
         changePat(res);
       });
-      bus.on("createPart",() => {
-        bbScene.createPart()
-      })
+      bus.on("createPart", () => {
+        bbScene.createPart();
+      });
     });
 
     //获取长、宽、高
     function getSizes(val) {
-      let { width, height, depth } = {...val} as any;
+      let { width, height, depth } = { ...val } as any;
       let box = bbScene.createInitialBox(width, height, depth);
       isCreate.value = true;
     }
@@ -189,11 +185,11 @@ export default defineComponent({
           beta = Math.PI;
           break;
       }
-        bbScene.changeView({ alpha, beta });
+      bbScene.changeView({ alpha, beta });
     }
 
     function changePat(val) {
-        val == "编辑模式" && bbScene.editPatterm();
+      val == "编辑模式" && bbScene.editPatterm();
       if (val == "实体模式") {
         ElMessageBox.confirm("是否切换为实体模式？", "提示", {
           confirmButtonText: "确认",
@@ -201,11 +197,12 @@ export default defineComponent({
           type: "warning",
         })
           .then(() => {
+            canSave.value = !canSave.value;
+            bbScene.createCSG();
             ElMessage({
               type: "success",
               message: "切换成功",
             });
-            bbScene.createCSG()
           })
           .catch(() => {
             ElMessage({
@@ -217,6 +214,7 @@ export default defineComponent({
     }
 
     return {
+      canSave,
       getSizes,
       // changeBSize,
       view,
@@ -231,12 +229,12 @@ export default defineComponent({
 </script>
 
 <template>
-  <el-radio-group v-model="patterm" class="radioBox" @change="changePat">
-    <el-row class="w100">
-      <el-col :span="12"> <el-radio-button label="编辑模式"/></el-col>
-      <el-col :span="12"><el-radio-button label="实体模式"/></el-col>
-    </el-row>
-  </el-radio-group>
+    <el-radio-group v-model="patterm" class="radioBox" @change="changePat">
+      <el-row class="w100">
+        <el-col :span="12"> <el-radio-button label="编辑模式"/></el-col>
+        <el-col :span="12"><el-radio-button label="实体模式"/></el-col>
+      </el-row>
+    </el-radio-group>
   <canvas id="canvas1" ref="bjsCanvas" v-menus:right="menus"></canvas>
 </template>
 
@@ -247,7 +245,7 @@ export default defineComponent({
   right: 45%;
   z-index: 9999;
 }
-.el-radio-button__inner{
+.el-radio-button__inner {
   margin-right: 15px;
 }
 canvas {

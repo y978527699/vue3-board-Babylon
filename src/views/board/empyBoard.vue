@@ -1,5 +1,6 @@
 <template>
   <div class="wrap">
+    <Product></Product>
     <!-- <Preview></Preview> -->
     <BoxDialog class="BoxDialog"></BoxDialog>
     <BabylonScene></BabylonScene>
@@ -12,8 +13,9 @@ import BoxDialog from "./tools/boxDialog.vue";
 import BabylonScene from "./BabylonScene.vue";
 import PanelHandle from './tools/panelHandle'
 import Preview from './tools/preview/preview.vue'
+import Product from '../../components/product/product.vue'
 export default {
-  components: { BoxDialog, BabylonScene,PanelHandle,Preview },
+  components: { BoxDialog, BabylonScene,PanelHandle,Preview,Product },
   setup(){
     return {
     }

@@ -113,7 +113,7 @@ export class BabylonHandle {
                 this.selectMesh.push(pickInfo.pickedMesh as Mesh);
               } else {
                 this.selectMesh.splice(ind, 1);
-                this.hl.removeMesh(pickInfo.pickedMesh as Mesh)
+                this.hl.removeMesh(pickInfo.pickedMesh as Mesh);
               }
               console.log(this.selectMesh);
             }
@@ -127,7 +127,7 @@ export class BabylonHandle {
     //监听鼠标点击事件
     scene.onPointerObservable.add((pointerInfo) => {
       let pickMesh = pointerInfo.pickInfo.pickedMesh as Mesh;
-      
+
       if (
         pickMesh != null &&
         pointerInfo.type == 64 &&
@@ -144,19 +144,18 @@ export class BabylonHandle {
 
       switch (pointerInfo.type) {
         case BABYLON.PointerEventTypes.POINTERDOWN:
-
           if (
             (pointerInfo.pickInfo!.hit && pickMesh?.name == "poly") ||
             pickMesh?.name == "cylinder"
           ) {
-            if(this.selectMesh.length > 1){
-              this.currentParent && this.clearChild(this.currentParent)
-              let ind = this.selectMesh.indexOf(pickMesh)
-              
-              this.currentParent = ind
+            if (this.selectMesh.length > 1) {
+              this.currentParent && this.clearChild(this.currentParent);
+              let ind = this.selectMesh.indexOf(pickMesh);
+
+              this.currentParent = ind;
               // this.addSeleChild(ind)
-              this.pointerDown(pickMesh)
-            }else{
+              this.pointerDown(pickMesh);
+            } else {
               this.pointerDown(pickMesh);
             }
           }
@@ -177,18 +176,20 @@ export class BabylonHandle {
     return scene;
   }
 
-  currentParent
-  clearChild(ind){
-    let arr = this.selectMesh[ind].getChildMeshes()
-    arr.forEach(item => {
-      this.selectMesh[ind].removeChild(item)
-    })
-    console.log(this.selectMesh[ind].getChildMeshes())
+  currentParent;
+  clearChild(ind) {
+    let arr = this.selectMesh[ind].getChildMeshes();
+    arr.forEach((item) => {
+      this.selectMesh[ind].removeChild(item);
+    });
+    console.log(this.selectMesh[ind].getChildMeshes());
   }
-  addSeleChild(ind){
-    for(let i = 0; i < this.selectMesh.length; i++){
-      if(ind == i){continue}
-      this.selectMesh[ind].addChild(this.selectMesh[i])
+  addSeleChild(ind) {
+    for (let i = 0; i < this.selectMesh.length; i++) {
+      if (ind == i) {
+        continue;
+      }
+      this.selectMesh[ind].addChild(this.selectMesh[i]);
     }
   }
 
@@ -231,7 +232,18 @@ export class BabylonHandle {
       this.editBox.isVisible = true;
       this.editHoleBox.isVisible = true;
       this.box.isVisible = false;
-      this.holeDisArr = this.createGrooMeasureLine(this.editHoleBox,this.holeWidth,this.holeDepth,this.holeDisArr);
+      if(this.part){
+        this.part.isVisible = true;
+        this.partHoleArr.forEach(item => {
+          item.isVisible = true
+        })
+      }
+      this.holeDisArr = this.createGrooMeasureLine(
+        this.editHoleBox,
+        this.holeWidth,
+        this.holeDepth,
+        this.holeDisArr
+      );
       this.getBoxPosition();
       this.createBoxMesLine();
       this.createHoleGUI(this.editHoleBox);
@@ -265,42 +277,21 @@ export class BabylonHandle {
         return mesh == this.editBox;
       }
     );
-    if(this.currentMesh == this.editHoleBox){
-      this.holeDisArr = this.createGrooMeasureLine(this.currentMesh,this.holeWidth,this.holeDepth,this.holeDisArr)
-    }else if(this.currentMesh == this.part){
-      this.partDisArr = this.createGrooMeasureLine(this.currentMesh,this.partWidth,this.parDepth,this.partDisArr)
+    if (this.currentMesh == this.editHoleBox) {
+      this.holeDisArr = this.createGrooMeasureLine(
+        this.currentMesh,
+        this.holeWidth,
+        this.holeDepth,
+        this.holeDisArr
+      );
+    } else if (this.currentMesh == this.part) {
+      this.partDisArr = this.createGrooMeasureLine(
+        this.currentMesh,
+        this.partWidth,
+        this.parDepth,
+        this.partDisArr
+      );
     }
-
-    //变更前更改测试线
-    // this.partDisArr = this.createGrooMeasureLine(this.part as Mesh,60,60,this.partDisArr)
-    // //根据拖动位置修改测试盒子的位置、大小
-    // //调整X
-    // let newXLength =
-    //   this.editHoleBox.getWorldMatrix().m[12] + Number(this.width) / 2;
-    // this.mesXBox.scaling = new BABYLON.Vector3(
-    //   (newXLength - this.holeWidth / 2) / this.xBoxLength,
-    //   1,
-    //   1
-    // );
-    // let xboxLength = newXLength - this.holeWidth / 2;
-    // this.mesXBox.position.x = -(xboxLength / 2 + this.holeWidth / 2);
-    // //修改侧方标注数据
-    // this.mesxInp.text = `${Math.ceil(newXLength - this.holeWidth / 2)}`;
-
-    // //调整Y
-    // let newYLength =
-    //   this.editHoleBox.getWorldMatrix().m[14] + Number(this.depth) / 2;
-    // this.mesYBox.scaling = new BABYLON.Vector3(
-    //   1,
-    //   1,
-    //   (newYLength - this.holeDepth / 2) / this.yBoxLength
-    // );
-    // let yboxLength = newYLength - this.holeDepth / 2;
-    // this.mesYBox.position.z = -(yboxLength / 2 + this.holeDepth / 2);
-    // this.yboxLength = yboxLength;
-    // this.xboxLength = xboxLength;
-    // //修改下方标注数据
-    // this.mesyInp.text = `${Math.ceil(newYLength - this.holeDepth / 2)}`;
 
     if (pickinfo?.hit) {
       return pickinfo?.pickedPoint;
@@ -423,7 +414,12 @@ export class BabylonHandle {
         target.linkWithMesh(mesh);
         panel.linkWithMesh(mesh);
         line.linkWithMesh(mesh);
-        this.holeDisArr = this.createGrooMeasureLine(this.editHoleBox,this.holeWidth,this.holeDepth,this.holeDisArr);
+        this.holeDisArr = this.createGrooMeasureLine(
+          this.editHoleBox,
+          this.holeWidth,
+          this.holeDepth,
+          this.holeDisArr
+        );
       });
       panel.addControl(radiusInp);
     } else {
@@ -447,7 +443,12 @@ export class BabylonHandle {
         target.linkWithMesh(mesh);
         panel.linkWithMesh(mesh);
         line.linkWithMesh(mesh);
-        this.holeDisArr = this.createGrooMeasureLine(this.editHoleBox,this.holeWidth,this.holeDepth,this.holeDisArr);
+        this.holeDisArr = this.createGrooMeasureLine(
+          this.editHoleBox,
+          this.holeWidth,
+          this.holeDepth,
+          this.holeDisArr
+        );
       });
       panel.addControl(widthInp);
 
@@ -471,7 +472,12 @@ export class BabylonHandle {
         target.linkWithMesh(mesh);
         panel.linkWithMesh(mesh);
         line.linkWithMesh(mesh);
-        this.holeDisArr = this.createGrooMeasureLine(this.editHoleBox,this.holeWidth,this.holeDepth,this.holeDisArr);
+        this.holeDisArr = this.createGrooMeasureLine(
+          this.editHoleBox,
+          this.holeWidth,
+          this.holeDepth,
+          this.holeDisArr
+        );
       });
       panel.addControl(depthtInp);
     }
@@ -496,7 +502,12 @@ export class BabylonHandle {
       target.linkWithMesh(mesh);
       panel.linkWithMesh(mesh);
       line.linkWithMesh(mesh);
-      this.holeDisArr = this.createGrooMeasureLine(this.editHoleBox,this.holeWidth,this.holeDepth,this.holeDisArr);
+      this.holeDisArr = this.createGrooMeasureLine(
+        this.editHoleBox,
+        this.holeWidth,
+        this.holeDepth,
+        this.holeDisArr
+      );
     });
     panel.addControl(heightInp);
 
@@ -787,7 +798,12 @@ export class BabylonHandle {
         this.holeHeight,
         this.holeMesh
       );
-      this.holeDisArr = this.createGrooMeasureLine(this.editHoleBox,this.holeWidth,this.holeDepth,this.holeDisArr);
+      this.holeDisArr = this.createGrooMeasureLine(
+        this.editHoleBox,
+        this.holeWidth,
+        this.holeDepth,
+        this.holeDisArr
+      );
     });
     rectx.addControl(xBoxInp);
 
@@ -845,7 +861,12 @@ export class BabylonHandle {
         this.holeHeight,
         this.holeMesh
       );
-      this.holeDisArr = this.createGrooMeasureLine(this.editHoleBox,this.holeWidth,this.holeDepth,this.holeDisArr);
+      this.holeDisArr = this.createGrooMeasureLine(
+        this.editHoleBox,
+        this.holeWidth,
+        this.holeDepth,
+        this.holeDisArr
+      );
     });
     recty.addControl(yBoxInp);
 
@@ -908,7 +929,12 @@ export class BabylonHandle {
         this.holeHeight,
         this.holeMesh
       );
-      this.holeDisArr = this.createGrooMeasureLine(this.editHoleBox,this.holeWidth,this.holeDepth,this.holeDisArr);
+      this.holeDisArr = this.createGrooMeasureLine(
+        this.editHoleBox,
+        this.holeWidth,
+        this.holeDepth,
+        this.holeDisArr
+      );
     });
     rectz.addControl(zBoxInp);
 
@@ -941,11 +967,11 @@ export class BabylonHandle {
       dot.position.z = depth / 2;
       copyDot.position.z = -depth / 2;
     }
-    return dot
+    return dot;
   }
 
   //创建槽
-  holeDisArr
+  holeDisArr;
   createHole(width, depth, height, mesh, isAdd: boolean = false) {
     this.holeMesh = mesh;
 
@@ -989,7 +1015,12 @@ export class BabylonHandle {
     holeMaterial.alpha = 0.5;
     polygon.material = holeMaterial;
     this.editHoleBox = polygon;
-    this.holeDisArr = this.createGrooMeasureLine(this.editHoleBox,this.holeWidth,this.holeDepth,this.holeDisArr);
+    this.holeDisArr = this.createGrooMeasureLine(
+      this.editHoleBox,
+      this.holeWidth,
+      this.holeDepth,
+      this.holeDisArr
+    );
 
     this.createHoleGUI(this.editHoleBox);
 
@@ -1006,7 +1037,6 @@ export class BabylonHandle {
 
   //开槽
   createCSG() {
-    console.log(this.holeArr);
     let boxCSG = BABYLON.CSG.FromMesh(this.editBox);
     for (let i = 0; i < this.holeArr.length; i++) {
       let holeCSG = BABYLON.CSG.FromMesh(this.holeArr[i]);
@@ -1014,19 +1044,32 @@ export class BabylonHandle {
     }
     this.box = boxCSG.toMesh("csgBox", this.boxMaterial, this.scene);
 
-    this.part.dispose();
+    // let boxHL = new BABYLON.HighlightLayer("boxHL", this.scene);
+    // boxHL.addMesh(this.box, BABYLON.Color3.Red());
+
     this.clearMes();
   }
 
   //转实体清除所有标识
   clearMes() {
+    if(this.part){
+      this.part.isVisible = false
+      this.partHoleArr.forEach(item => {
+        item.isVisible = false
+      })
+    }
+    if(this.holeDisArr){this.holeDisArr.forEach(item => {
+      item.dispose()
+    })}
+    if(this.partDisArr){
+      this.partDisArr.forEach(item => {
+        item.dispose()
+      })
+    }
     this.editBox.isVisible = false;
     this.editHoleBox.isVisible = false;
-    // this.mesAdvancedTexture.dispose();
     this.panelAdvancedTexture.dispose();
     this.mesBoxAdvancedTexture.dispose();
-    // this.mesXBox.dispose();
-    // this.mesYBox.dispose();
     this.xLine.dispose();
     this.yLine.dispose();
     this.zLine.dispose();
@@ -1304,9 +1347,10 @@ export class BabylonHandle {
 
   //创建配件
   part;
-  partDisArr
-  partWidth
-  parDepth
+  partDisArr;
+  partWidth;
+  parDepth;
+  partHoleArr
   createPart(height: number = 400, diameter: number = 60) {
     const cylinder = BABYLON.MeshBuilder.CreateCylinder(
       "cylinder",
@@ -1343,22 +1387,32 @@ export class BabylonHandle {
     partHole2.position.x = 0;
     partHole2.position.z -= margin;
 
-    this.partWidth = diameter / 2
-    this.parDepth = diameter / 2
+    this.partWidth = diameter / 2;
+    this.parDepth = diameter / 2;
     this.holeArr.push(partHole, partHole1, partHole2);
     this.part = cylinder;
-    this.partDisArr = this.createGrooMeasureLine(cylinder,30,30,this.partDisArr)
+    this.partHoleArr = [partHole, partHole1, partHole2]
+    this.partDisArr = this.createGrooMeasureLine(
+      cylinder,
+      30,
+      30,
+      this.partDisArr
+    );
   }
 
   //创建槽标注线
-  createGrooMeasureLine(mesh: Mesh,width,depth,disArr) {
-    if(disArr){
-      for(let i = 0; i < disArr.length - 2; i++){
-        disArr[i].dispose()
+  createGrooMeasureLine(mesh: Mesh, width, depth, disArr) {
+    let height = -mesh.getWorldMatrix().m[13] + 20
+    if(mesh == this.editHoleBox){
+      height = 10
+    }
+    if (disArr) {
+      for (let i = 0; i < disArr.length - 2; i++) {
+        disArr[i].dispose();
       }
     }
     //侧面假量尺
-    let matX = mesh.getWorldMatrix().m[12]
+    let matX = Math.round(mesh.getWorldMatrix().m[12]);
     let xBoxLength = this.width / 2 + matX - width / 2;
     let mesXBox = BABYLON.MeshBuilder.CreateBox(
       "mesXBox",
@@ -1367,16 +1421,12 @@ export class BabylonHandle {
     );
 
     mesXBox.setParent(mesh);
-    mesXBox.position = new BABYLON.Vector3(
-      -xBoxLength / 2 - width / 2,
-      10,
-      0
-    );
+    mesXBox.position = new BABYLON.Vector3(-xBoxLength / 2 - width / 2, 10, 0);
 
     let dotX = this.createPun(mesXBox, xBoxLength, 0, 0);
 
     //底部假量尺
-    let matZ = mesh.getWorldMatrix().m[14]
+    let matZ = Math.round(mesh.getWorldMatrix().m[14]);
     let yBoxLength = this.depth / 2 + matZ - depth / 2;
     let mesYBox = BABYLON.MeshBuilder.CreateBox("mesYBox", {
       width: 5,
@@ -1384,11 +1434,7 @@ export class BabylonHandle {
       depth: yBoxLength,
     });
     mesYBox.setParent(mesh);
-    mesYBox.position = new BABYLON.Vector3(
-      0,
-      10,
-      -yBoxLength / 2 - depth / 2
-    );
+    mesYBox.position = new BABYLON.Vector3(0, 10, -yBoxLength / 2 - depth / 2);
     let dotY = this.createPun(mesYBox, 0, 0, yBoxLength);
 
     //创建可输入槽距数据展示
@@ -1397,7 +1443,7 @@ export class BabylonHandle {
     );
 
     let rectx = new Rectangle();
-    rectx.width = "50px";
+    rectx.width = "60px";
     rectx.height = "20px";
     rectx.cornerRadius = 20;
     rectx.background = "#808080";
@@ -1421,14 +1467,13 @@ export class BabylonHandle {
       // );
       // this.editHoleBox.position.x =
       //   newXLength + this.holeWidth / 2 - Number(this.width) / 2;
-
       // this.mesXBox.position.x = -(newXLength / 2 + this.holeWidth / 2);
       // mesxInp.text = mesXItem.text
     });
     rectx.addControl(mesxInp);
 
     let recty = new Rectangle();
-    recty.width = "50px";
+    recty.width = "60px";
     recty.height = "20px";
     recty.cornerRadius = 20;
     recty.background = "#808080";
@@ -1452,13 +1497,14 @@ export class BabylonHandle {
       // );
       // this.editHoleBox.position.z =
       //   newYLength + this.holeDepth / 2 - Number(this.depth) / 2;
-
       // this.mesYBox.position.z = -(newYLength / 2 + this.holeDepth / 2);
       // mesyInp.text = mesYItem.text
     });
     recty.addControl(mesyInp);
 
-    return [mesXBox,mesYBox,mesAdvancedTexture,dotX,dotY]
+    let retDisArr = [mesXBox, mesYBox, mesAdvancedTexture, dotX, dotY];
+
+    return retDisArr;
   }
 }
 
