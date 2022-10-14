@@ -2,6 +2,7 @@
   <router-view/>
   <!-- <SET /> -->
 </template>
+
 <script lang="ts">
 import { defineComponent, nextTick, onMounted } from 'vue'
 import SET from "@/components/set/set.vue";
