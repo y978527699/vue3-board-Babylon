@@ -1,6 +1,6 @@
 <template>
-  <el-button text @click="outerVisible = true">open the outer Dialog</el-button>
-  <el-dialog v-model="outerVisible" width="80%" top="8vh">
+  <!-- <el-button text @click="outerVisible = true">open the outer Dialog</el-button> -->
+  <el-dialog v-model="outerVisible" width="80%" top="8vh" @close="handleClose">
     <template #title>
       <el-image
         class="dialogImg"
@@ -75,6 +75,7 @@
 </template>
 
 <script lang="ts">
+import bus from "@/views/board/utils/bus";
 import { defineComponent, ref, reactive, getCurrentInstance,onMounted } from "vue";
 import { menuList, productsList,lineImgs } from "./publicData"; // 数据
 import ShowDialog from "./showDialog.vue";
@@ -109,6 +110,10 @@ export default defineComponent({
       currentId.value = ""
       innerVisible.value = false;
     };
+    //关闭对话框
+    let handleClose = () => {
+      bus.emit('closePart',!outerVisible.value)
+    };
     // 格式化溢出文本
     const ellipsis = (value) => {
       if (!value) return "";
@@ -121,8 +126,13 @@ export default defineComponent({
       let filterList = productsList.filter((item) => item.pId == "0010101");
       list.value = filterList[0] ? filterList[0].content : [];
       console.log(list.value, "获取对应产品列表");
+
+      bus.on('part',value => {
+        outerVisible.value = value as boolean
+      })
     });
     return {
+      handleClose,
       outerVisible,
       innerVisible,
       logoUrl,

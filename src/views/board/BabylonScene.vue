@@ -100,13 +100,21 @@ export default defineComponent({
         {
           label: "编辑参数",
           click: () => {
-            isShow.value = !isShow.value;
-            bus.emit("plane", isShow.value);
+            panelShow.value = !panelShow.value;
+            bus.emit("plane", panelShow.value);
+          },
+        },
+        {
+          label: "添加配件",
+          click: () => {
+            partShow.value = !partShow.value;
+            bus.emit("part", partShow.value);
           },
         },
       ],
     });
-    let isShow = ref(false);
+    let partShow = ref(false);
+    let panelShow = ref(false);
     let isCreate = ref<boolean>(false);
     let view = ref<string>("");
     let patterm = ref<string>("");
@@ -129,6 +137,15 @@ export default defineComponent({
       });
       bus.on("createPart", () => {
         bbScene.createPart();
+      });
+
+      bus.on("closePart", (value) => {
+        partShow.value = !partShow.value;
+      });
+
+      bus.on("applyPart", (value) => {
+        console.log(value,'1111');
+        bbScene.createPart()
       });
     });
 
@@ -229,12 +246,12 @@ export default defineComponent({
 </script>
 
 <template>
-    <el-radio-group v-model="patterm" class="radioBox" @change="changePat">
-      <el-row class="w100">
-        <el-col :span="12"> <el-radio-button label="编辑模式"/></el-col>
-        <el-col :span="12"><el-radio-button label="实体模式"/></el-col>
-      </el-row>
-    </el-radio-group>
+  <el-radio-group v-model="patterm" class="radioBox" @change="changePat">
+    <el-row class="w100">
+      <el-col :span="12"> <el-radio-button label="编辑模式"/></el-col>
+      <el-col :span="12"><el-radio-button label="实体模式"/></el-col>
+    </el-row>
+  </el-radio-group>
   <canvas id="canvas1" ref="bjsCanvas" v-menus:right="menus"></canvas>
 </template>
 

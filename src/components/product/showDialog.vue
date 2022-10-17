@@ -118,6 +118,7 @@ import { defineComponent, ref, watch } from "vue";
 import { goods } from "./publicData";
 import CustomMap from "../customMap/index.vue";
 import Baidu from "../../views/map/baidu.vue";
+import bus from "@/views/board/utils/bus";
 export default defineComponent({
   components: { CustomMap, Baidu },
   props: ["innerVisible", "currentId"],
@@ -160,7 +161,9 @@ export default defineComponent({
       goodsData.value = ref({})
     };
     const replace = () => {};
-    const application = () => {};
+    const application = () => {
+      bus.emit('applyPart',goodsId.value)
+    };
     return {
       visible,
       goodsData,
