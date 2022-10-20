@@ -1,13 +1,13 @@
 <template>
   <!-- <el-button text @click="outerVisible = true">open the outer Dialog</el-button> -->
-  <el-dialog v-model="outerVisible" width="80%" top="8vh" @close="handleClose">
+  <el-dialog v-model="outerVisible" width="80%" top="8vh" @close="handleClose" :close-on-press-escape="false">
     <template #title>
-      <el-image
-        class="dialogImg"
-        style="width: 20px; height: 20px;"
-        :src="logoUrl"
-      />
       <div class="mt-4 searchBox">
+        <el-image
+        class="dialogImg"
+        style="width: 30px; height: 30px;"
+        :src="logoUrl"
+        />
         <el-input
           v-model="searchVal"
           placeholder="请输入配件"
@@ -56,9 +56,11 @@
               </template>
             </el-popover>
             <span class="hiddenText" v-else>{{ item.introduce }}</span>
-            <!-- <a :title="item.introduce" class="hiddenText">{{
-              item.introduce
-            }}</a> -->
+          </li>
+          <li class="liSty" @click="uploadHandle">
+            <div>
+              <i class="el-icon-plus"></i>
+            </div>
           </li>
         </ul>
         <el-empty v-else description="暂无数据" :image-size="200" />
@@ -70,6 +72,8 @@
         :currentId="currentId"
         @changeInnerVisible="changeInnerVisible"
       />
+      <!-- 上传 -->
+      <UploadDia v-if="uploadShow" @changeDiaVisible="uploadHandle"></UploadDia>
     </template>
   </el-dialog>
 </template>
@@ -79,6 +83,7 @@ import bus from "@/views/board/utils/bus";
 import { defineComponent, ref, reactive, getCurrentInstance,onMounted } from "vue";
 import { menuList, productsList,lineImgs } from "./publicData"; // 数据
 import ShowDialog from "./showDialog.vue";
+import UploadDia from "./uploadDia.vue";
 export default defineComponent({
   setup(props) {
     const { proxy } = getCurrentInstance() as any;
@@ -86,6 +91,11 @@ export default defineComponent({
     const innerVisible = ref(false); // 产品详情弹框
     const logoUrl = require("../../static/images/dialogImg.png"); // 标题logo图标
     const searchVal = ref<string>(""); // 顶部查询字段
+    let uploadShow = ref<boolean>(false)
+    //上传对话框
+    let uploadHandle = () => {
+      uploadShow.value = !uploadShow.value
+    }
     // 产品列表
     let list = ref([]);
     // 当前查询详情的数据id
@@ -106,9 +116,10 @@ export default defineComponent({
       console.log(innerVisible.value)
     };
     // 隐藏产品弹框
-    let changeInnerVisible = () => {
+    let changeInnerVisible = (val) => {
       currentId.value = ""
       innerVisible.value = false;
+      val && (outerVisible.value = false)
     };
     //关闭对话框
     let handleClose = () => {
@@ -144,12 +155,15 @@ export default defineComponent({
       openDetails,
       changeInnerVisible,
       ellipsis,
-      currentId
+      currentId,
+      uploadHandle,
+      uploadShow
     };
   },
   components: {
     ShowDialog,
-  },
+    UploadDia
+},
 });
 </script>
 <style>
@@ -164,7 +178,6 @@ export default defineComponent({
   padding: 0 0 20px 0;
 }
 .el-dialog__header {
-  padding: 0;
 }
 .el-cascader-node {
   padding: 0 15px 0 0;
@@ -174,22 +187,22 @@ export default defineComponent({
   padding-bottom: 15px;
 }
 .searchBox .el-input__inner {
-  width: 300px !important;
+  width: 400px !important;
   border-radius: 7px;
+  /* height: 45px !important; */
 }
 .searchBox .el-input-group__append,
 .el-input-group__prepend {
   background: none;
   border: none;
-  padding: 0 10px;
+  padding: 0 12px;
 }
 .dialogImg {
   border-radius: 30px;
-  margin: 10px;
 }
 .el-input-group__prepend {
-  font-size: 18px;
-  margin-top: 3px;
+  font-size: 23px;
+  line-height: 5px;
 }
 .recWrap .el-col {
   height: 150px;
@@ -246,5 +259,9 @@ export default defineComponent({
 }
 .lineImg:hover {
   border: 1px solid #409eff;
+}
+li .el-icon-plus {
+  font-size: 70px;
+  line-height: 180px
 }
 </style>

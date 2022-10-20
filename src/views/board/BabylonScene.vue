@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, onMounted, ref, shallowRef } from "vue";
+import { defineComponent, onMounted, ref, shallowRef, watch } from "vue";
 import { BabylonHandle } from "./core/BabylonHandle";
 import { directive } from "vue3-menus";
 import bus from "./utils/bus";
@@ -111,6 +111,12 @@ export default defineComponent({
             bus.emit("part", partShow.value);
           },
         },
+        {
+          label: "替换配件",
+          click: () => {
+            replacePart();
+          },
+        },
       ],
     });
     let partShow = ref(false);
@@ -120,6 +126,17 @@ export default defineComponent({
     let patterm = ref<string>("");
     let canSave = ref<boolean>(false);
     let bbScene;
+    let replaceShow = ref(true)
+    let replacePart = () => {
+      if (bbScene.selectMesh.length == 0) {
+        ElMessage({
+          message: "未选择被替换配件，请双击选择需替换配件！",
+          type: "warning",
+        });
+        return
+      }
+      bus.emit('replaceShow',replaceShow.value)
+    };
     onMounted(() => {
       const canvas = document.getElementById("canvas1") as HTMLCanvasElement;
       let obj = new BabylonHandle(canvas);
@@ -136,7 +153,7 @@ export default defineComponent({
         changePat(res);
       });
       bus.on("createPart", () => {
-        bbScene.createPart();
+        bbScene.createPipe();
       });
 
       bus.on("closePart", (value) => {
@@ -144,9 +161,12 @@ export default defineComponent({
       });
 
       bus.on("applyPart", (value) => {
-        console.log(value,'1111');
-        bbScene.createPart()
+        bbScene.createPipe();
       });
+
+      bus.on('replacePart',(value) => {
+        bbScene.createPipe()
+      })
     });
 
     //获取长、宽、高
@@ -214,12 +234,14 @@ export default defineComponent({
           type: "warning",
         })
           .then(() => {
-            canSave.value = !canSave.value;
-            bbScene.createCSG();
             ElMessage({
               type: "success",
               message: "切换成功",
             });
+            canSave.value = !canSave.value;
+            setTimeout(() => {
+              bbScene.createCSG();
+            },0)
           })
           .catch(() => {
             ElMessage({
@@ -246,7 +268,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <el-radio-group v-model="patterm" class="radioBox" @change="changePat">
+  <el-radio-group v-model="patterm" class="radioBox" @change="changePat" v-if="isCreate">
     <el-row class="w100">
       <el-col :span="12"> <el-radio-button label="编辑模式"/></el-col>
       <el-col :span="12"><el-radio-button label="实体模式"/></el-col>

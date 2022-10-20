@@ -6,29 +6,50 @@
     @close="handleClose"
     width="50%"
     top="8vh"
+    :destroy-on-close="true"
   >
     <el-backtop :right="310" :bottom="60" target=".detailsBox" />
-    <el-carousel trigger="click" height="250px">
-      <el-carousel-item v-for="item in goodsData.bannerImgs" :key="item">
-        <img style="width:100%;height: 100%;" :src="item" />
-      </el-carousel-item>
-    </el-carousel>
+    <div class="bannerWrap">
+      <!-- <el-row style="height:250px" v-show="isCanShow"> -->
+      <el-row style="height:250px">
+        <el-col :span="12"
+          ><el-carousel trigger="click" height="250px">
+            <el-carousel-item v-for="item in goodsData?.bannerImgs" :key="item">
+              <img style="width:100%;height: 100%;" :src="item" />
+            </el-carousel-item> </el-carousel
+        ></el-col>
+        <el-col :span="12" id="canCol">
+          <canvas id="partStore" style="height:100%"></canvas>
+        </el-col>
+      </el-row>
+      <!-- <el-carousel trigger="click" height="250px" v-show="!isCanShow">
+        <el-carousel-item v-for="item in goodsData?.bannerImgs" :key="item">
+          <img style="width:100%;height: 100%;" :src="item" />
+        </el-carousel-item>
+      </el-carousel> -->
+      <div class="goodName">{{ goodsData?.name }}</div>
+    </div>
     <div class="core">
+      <!-- <button @click="handleCan">11</button> -->
+      <!-- <div class="showCan">
+        <el-button @click="handleCan" v-show="!isCanShow" round>3D演示</el-button>
+        <el-button @click="handleCan" v-show="isCanShow">关闭演示</el-button>
+      </div> -->
       <div class="container">
         <div>
           <div class="goodInfo">
-            <h1 class="goodName">{{ goodsData.name }}</h1>
-            <span class="goodInt">{{ goodsData.introduce }}</span>
+            <!-- <h1 class="goodName">{{ goodsData?.name }}</h1> -->
+            <span class="goodInt">{{ goodsData?.introduce }}</span>
           </div>
           <el-divider />
           <div class="specs">
             <div class="specsTip">可选规格：</div>
-            <el-button v-for="item in goodsData.specs" :key="item.sid">{{
+            <el-button v-for="item in goodsData?.specs" :key="item.sid">{{
               item.sname
             }}</el-button>
           </div>
           <div class="appBtn">
-            <el-button type="info" @click="replace">替换</el-button>
+            <!-- <el-button type="info" @click="replace">替换</el-button> -->
             <el-button type="primary" @click="application">应用</el-button>
           </div>
         </div>
@@ -55,7 +76,9 @@
             <template #header>
               <el-row class="row-bg" justify="space-between" align="middle">
                 <el-col :span="12"
-                  >配件评价({{ goodsData.evaluate && goodsData.evaluate.length }})</el-col
+                  >配件评价({{
+                    goodsData?.evaluate && goodsData?.evaluate.length
+                  }})</el-col
                 >
                 <el-col :span="12" style="text-align: right;">
                   <el-link :underline="false" type="warning" href="javascript:;"
@@ -65,7 +88,7 @@
               </el-row>
             </template>
             <template
-              v-for="(item, index) in goodsData.evaluate"
+              v-for="(item, index) in goodsData?.evaluate"
               :key="item.uid"
               class="text item"
             >
@@ -91,11 +114,11 @@
         </div>
         <div class="content">
           <div class="details">
-            <video class="video" controls v-if="goodsData.video">
-              <source :src="goodsData.video" type="video/mp4" />
+            <video class="video" controls>
+              <source :src="goodsData?.video" type="video/mp4" />
             </video>
             <el-image
-              v-for="(item, index) in goodsData.introImgs"
+              v-for="(item, index) in goodsData?.introImgs"
               :key="index"
               :src="item"
             ></el-image>
@@ -114,20 +137,24 @@
   </el-dialog>
 </template>
 <script lang="ts">
-import { defineComponent, ref, watch } from "vue";
+import { defineComponent, onMounted, reactive, ref, watch } from "vue";
 import { goods } from "./publicData";
 import CustomMap from "../customMap/index.vue";
 import Baidu from "../../views/map/baidu.vue";
 import bus from "@/views/board/utils/bus";
+import { partBblon } from "./partBblon";
 export default defineComponent({
   components: { CustomMap, Baidu },
   props: ["innerVisible", "currentId"],
   setup(props, context) {
+    let handleCan = () => {
+      let partCan = document.getElementById("partStore") as HTMLCanvasElement;
+      let partBb = new partBblon(partCan);
+    };
     let visible = ref(false);
     let goodsData = ref({});
     let goodsId = ref("");
     const activeName = ref<string>("evaluate");
-
     const getData = () => {
       let filterData = goods.filter((item) => {
         return item.id == goodsId.value;
@@ -147,31 +174,39 @@ export default defineComponent({
       () => props.innerVisible,
       (newVal, oldVal) => {
         visible.value = newVal;
+        setTimeout(() => {
+          handleCan();
+        }, 1);
       }
     );
     watch(
       () => props.currentId,
       (newVal, oldVal) => {
-        goodsId.value = newVal
+        goodsId.value = newVal;
         getData();
-      },{immediate: true}
+      },
+      { immediate: true }
     );
     let handleClose = () => {
       context.emit("changeInnerVisible");
-      goodsData.value = ref({})
+      // isCanShow.value = false;
     };
-    const replace = () => {};
+    // const replace = () => {};
     const application = () => {
-      bus.emit('applyPart',goodsId.value)
+      bus.emit("applyPart", goodsId.value);
+      visible.value = false;
+      context.emit("changeInnerVisible", true);
     };
     return {
       visible,
       goodsData,
       activeName,
       handleClose,
-      replace,
+      // replace,
       application,
-      handleJump
+      handleJump,
+      handleCan,
+      // isCanShow,
     };
   },
 });
@@ -193,10 +228,14 @@ export default defineComponent({
 .evaluate .el-card__body {
   padding-bottom: 0 !important;
 }
+.detailsBox .el-dialog__header {
+  padding: 0;
+}
 </style>
 <style scoped>
 .core {
   padding: 0 20px;
+  position: relative;
 }
 .demonstration {
   color: var(--el-text-color-secondary);
@@ -223,6 +262,8 @@ export default defineComponent({
 }
 .goodInfo .goodInt {
   color: #b7b7b7;
+  width: 550px;
+  display: inline-block;
   /* padding-left: 15px; */
 }
 .lineBox {
@@ -298,5 +339,28 @@ export default defineComponent({
 .appBtn .el-button {
   min-height: 20px;
   padding: 12px 50px;
+}
+
+.showCan {
+  position: absolute;
+  right: 0;
+  top: -15px;
+}
+
+.bannerWrap {
+  position: relative;
+}
+
+.goodName {
+  position: absolute;
+  bottom: 0px;
+  background-color: rgb(0 0 0 / 40%);
+  z-index: 11;
+  width: 180px;
+  height: 70px;
+  text-align: center;
+  line-height: 70px;
+  color: white;
+  font-size: 25px;
 }
 </style>

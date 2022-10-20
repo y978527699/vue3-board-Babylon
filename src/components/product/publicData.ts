@@ -303,7 +303,7 @@ const productsList = [
     content: [
       {
         id: "102",
-        name: "克在隐式连接件",
+        name: "克在连接件",
         src: require("@/static/images/hardware/hide/hi1.jpg"),
         introduce: "ledledled双屏显示器支架，支持升降",
       },
@@ -322,9 +322,27 @@ const productsList = [
       },
       {
         id: "104",
-        name: "滑轨",
-        src: require("@/static/images/mat4.png"),
-        introduce: "滑轨滑轨卡扣双屏显示器支架卡扣卡扣，支持升降",
+        name: "克在连接件",
+        src: require("@/static/images/hardware/hide/hi1.jpg"),
+        introduce: "ledledled双屏显示器支架，支持升降",
+      },
+      {
+        id: "105",
+        name: "克在连接件",
+        src: require("@/static/images/hardware/hide/hi1.jpg"),
+        introduce: "ledledled双屏显示器支架，支持升降",
+      },
+      {
+        id: "106",
+        name: "克在连接件",
+        src: require("@/static/images/hardware/hide/hi1.jpg"),
+        introduce: "ledledled双屏显示器支架，支持升降",
+      },
+      {
+        id: "107",
+        name: "克在连接件",
+        src: require("@/static/images/hardware/hide/hi1.jpg"),
+        introduce: "ledledled双屏显示器支架，支持升降",
       },
     ],
   },
@@ -381,10 +399,8 @@ const productsList = [
 const goods = [
   {
     id: "102",
-    name: "显示器支架",
+    name: "克在连接件",
     bannerImgs: [
-      require("@/static/images/hardware/hide/hi1.jpg"),
-      require("@/static/images/hardware/hide/hi2.jpg"),
       require("@/static/images/hardware/hide/hi3.jpg"),
       require("@/static/images/hardware/hide/hi4.jpg"),
       require("@/static/images/hardware/hide/hi5.jpg"),
@@ -448,6 +464,7 @@ const goods = [
           "我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军",
       },
     ],
+    draw: require("@/static/images/hardware/hide/hiDraw.jpg")
   },
   {
     id: "101",
@@ -457,7 +474,6 @@ const goods = [
       require("@/static/images/partPipe/pipe02.jpg"),
       require("@/static/images/partPipe/pipe03.jpg"),
       require("@/static/images/partPipe/pipe04.jpg"),
-      require("@/static/images/partPipe/pipe05.jpg"),
     ],
     specs: [
       {
@@ -518,6 +534,7 @@ const goods = [
           "我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军",
       },
     ],
+    draw: require("@/static/images/hardware/hide/hiDraw.jpg")
   },
 ];
 //推荐栏商品
