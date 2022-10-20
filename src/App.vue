@@ -1,23 +1,20 @@
 <template>
-  <router-view/>
-  <!-- <SET /> -->
+  <router-view></router-view>
 </template>
 
 <script lang="ts">
-import { defineComponent, nextTick, onMounted } from 'vue'
-import SET from "@/components/set/set.vue";
+import { defineComponent, onMounted } from "vue";
 export default defineComponent({
   setup(props) {
-    let theme=window.localStorage.getItem("theme");
-    theme&&window.document.documentElement.setAttribute("data-ming",theme);
+    let theme = window.localStorage.getItem("theme");
+    theme && window.document.documentElement.setAttribute("data-ming", theme);
   },
-  components:{SET}
-})
+  components: {},
+});
 </script>
 
 <style lang="scss">
-  *{
-    margin: 0;
-  }
-  
+* {
+  margin: 0;
+}
 </style>

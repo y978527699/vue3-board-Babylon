@@ -151,7 +151,7 @@ export default defineComponent({
       let partCan = document.getElementById("partStore") as HTMLCanvasElement;
       let partBb = new partBblon(partCan);
     };
-    let visible = ref(false);
+    let visible = true;
     let goodsData = ref({});
     let goodsId = ref("");
     const activeName = ref<string>("evaluate");
@@ -170,18 +170,15 @@ export default defineComponent({
       }
       document.querySelector("handleJump").scrollIntoView(true); //这里的counter1是将要返回地方的id
     };
-    watch(
-      () => props.innerVisible,
-      (newVal, oldVal) => {
-        visible.value = newVal;
-        setTimeout(() => {
+    onMounted(() => {
+      setTimeout(() => {
           handleCan();
         }, 1);
-      }
-    );
+    })
     watch(
       () => props.currentId,
       (newVal, oldVal) => {
+        console.log(newVal,'newValnewValnewVal')
         goodsId.value = newVal;
         getData();
       },
@@ -194,7 +191,6 @@ export default defineComponent({
     // const replace = () => {};
     const application = () => {
       bus.emit("applyPart", goodsId.value);
-      visible.value = false;
       context.emit("changeInnerVisible", true);
     };
     return {

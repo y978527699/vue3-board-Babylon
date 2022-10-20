@@ -3,7 +3,7 @@
         <template v-for="v in state.menuList" :key="v.name">
             <div v-if="v.children && v.children.length > 0 ">
                 <!-- 外层 -->
-                <el-submenu :index="v.name" :key="v.name" class="theme-bg" v-if="!v.meta.hide">
+                <el-sub-menu :index="v.name" :key="v.name" class="theme-bg" v-if="!v.meta.hide">
                     <template v-slot:title>
                         <i
                             class="iconfont theme-color"
@@ -14,7 +14,7 @@
                     <el-menu-item-group>
                         <my-nav :menuList="v.children"></my-nav>
                     </el-menu-item-group>
-                </el-submenu>
+                </el-sub-menu>
             </div>
             <div v-else>
                 <!-- 内层 -->

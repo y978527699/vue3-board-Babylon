@@ -97,14 +97,13 @@ export const DynamicRoutes = [
             },
             children: [
               {
-                path: "TopBoard",
-                component: () =>
-                  import("@/views/board/bookCase/topBoard.vue"),
-                name: "topboard",
+                path: "Cabinet",
+                component: () => import("@/views/board/bookCase/cabinet.vue"),
+                name: "cabinet",
                 meta: {
-                  name: "顶板",
+                  name: "书柜",
                   icon: "el-icon-document",
-                }
+                },
               },
               {
                 path: "BottomBoard",
@@ -114,17 +113,16 @@ export const DynamicRoutes = [
                 meta: {
                   name: "底板",
                   icon: "el-icon-document",
-                }
+                },
               },
               {
                 path: "LeftBoard",
-                component: () =>
-                  import("@/views/board/bookCase/leftBoard.vue"),
+                component: () => import("@/views/board/bookCase/leftBoard.vue"),
                 name: "leftboard",
                 meta: {
                   name: "左侧板",
                   icon: "el-icon-document",
-                }
+                },
               },
               {
                 path: "RightBoard",
@@ -134,7 +132,7 @@ export const DynamicRoutes = [
                 meta: {
                   name: "右侧板",
                   icon: "el-icon-document",
-                }
+                },
               },
             ],
           },

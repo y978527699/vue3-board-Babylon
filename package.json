@@ -13,7 +13,7 @@
     "codemirror": "^5.62.0",
     "earcut": "^2.2.4",
     "echarts": "^5.1.2",
-    "element-plus": "^1.0.2-beta.55",
+    "element-plus": "^2.2.18",
     "mitt": "^3.0.0",
     "nprogress": "^0.2.0",
     "qrcanvas": "^3.1.2",

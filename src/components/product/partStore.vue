@@ -1,131 +1,168 @@
 <template>
-  <!-- <el-button text @click="outerVisible = true">open the outer Dialog</el-button> -->
-  <el-dialog v-model="outerVisible" width="80%" top="8vh" @close="handleClose" :close-on-press-escape="false">
+  <el-button text @click="outerVisible = true" v-show="false">open the outer Dialog</el-button>
+  <el-dialog
+    v-model="outerVisible"
+    width="80%"
+    top="8vh"
+    @close="handleClose"
+    :close-on-press-escape="false"
+  >
     <template #title>
       <div class="mt-4 searchBox">
         <el-image
-        class="dialogImg"
-        style="width: 30px; height: 30px;"
-        :src="logoUrl"
+          class="dialogImg"
+          style="width: 30px; height: 30px"
+          :src="logoUrl"
         />
+
         <el-input
           v-model="searchVal"
           placeholder="请输入配件"
           class="input-with-select"
         >
+
           <template #prepend>
-            有屋配件库
+             有屋配件库
             <!-- <el-button :icon="Search" /> -->
+
           </template>
+
         </el-input>
+
       </div>
+
     </template>
+
     <template #default>
+
       <el-row class="recWrap">
+
         <el-col
           :span="24 / lineImgs.length"
           v-for="(item, index) in lineImgs"
           :key="index"
         >
-          <el-image class="lineImg" :src="item.img" @click="openDetails(item.id)" />
+
+          <el-image
+            class="lineImg"
+            :src="item.img"
+            @click="openDetails(item.id)"
+          />
+
         </el-col>
+
       </el-row>
+
       <el-row>
+
         <el-col :span="6">
+
           <el-cascader-panel
             ref="menuList"
             :options="menuList"
             @change="changeHandle"
             model-value="0010101"
           />
+
         </el-col>
+
         <el-col :span="18">
-        <ul class="ulBox" v-if="list.length > 0">
-          <li class="liSty" v-for="item in list" :key="item.id" @click="openDetails(item.id)">
-            <el-image style="height: 120px" :src="item.src" fit="scale-down" />
-            <div class="nameSty">{{ item.name }}</div>
-            <el-popover
-              v-if="item.introduce.length > 30"
-              placement="top-start"
-              :width="200"
-              trigger="hover"
-              :content="item.introduce"
+
+          <ul class="ulBox" v-if="list.length > 0">
+
+            <li
+              class="liSty"
+              v-for="item in list"
+              :key="item.id"
+              @click="openDetails(item.id)"
             >
-              <template #reference>
-                <span class="hiddenText">{{ ellipsis(item.introduce) }}</span>
-              </template>
-            </el-popover>
-            <span class="hiddenText" v-else>{{ item.introduce }}</span>
-          </li>
-          <li class="liSty" @click="uploadHandle">
-            <div>
-              <i class="el-icon-plus"></i>
-            </div>
-          </li>
-        </ul>
-        <el-empty v-else description="暂无数据" :image-size="200" />
-      </el-col>
+
+              <el-image
+                style="height: 120px"
+                :src="item.src"
+                fit="scale-down"
+              />
+
+              <div class="nameSty">{{ item.name }}</div>
+
+              <el-popover
+                v-if="item.introduce.length > 30"
+                placement="top-start"
+                :width="200"
+                trigger="hover"
+                :content="item.introduce"
+              >
+
+                <template #reference>
+
+                  <span class="hiddenText">{{ ellipsis(item.introduce) }}</span>
+
+                </template>
+
+              </el-popover>
+
+              <span class="hiddenText" v-else>{{ item.introduce }}</span>
+
+            </li>
+
+            <li class="liSty" @click="uploadHandle">
+
+              <div>
+
+                <!-- <i class="el-icon-plus"></i> -->
+
+              </div>
+
+            </li>
+
+          </ul>
+
+          <el-empty v-else description="暂无数据" :image-size="200" />
+
+        </el-col>
+
       </el-row>
-      <!-- 产品详情 -->
+
       <ShowDialog
-        v-model:innerVisible="innerVisible"
+        v-if="innerVisible"
         :currentId="currentId"
         @changeInnerVisible="changeInnerVisible"
-      />
+      ></ShowDialog>
+
       <!-- 上传 -->
+
       <UploadDia v-if="uploadShow" @changeDiaVisible="uploadHandle"></UploadDia>
+
     </template>
   </el-dialog>
+
 </template>
 
 <script lang="ts">
-import bus from "@/views/board/utils/bus";
-import { defineComponent, ref, reactive, getCurrentInstance,onMounted } from "vue";
-import { menuList, productsList,lineImgs } from "./publicData"; // 数据
+import { getCurrentInstance, onMounted, ref } from "vue";
 import ShowDialog from "./showDialog.vue";
 import UploadDia from "./uploadDia.vue";
-export default defineComponent({
-  setup(props) {
+import {
+  menuList,
+  productsList,
+  lineImgs,
+} from "./publicData";
+import bus from "@/views/board/utils/bus";
+
+export default {
+  setup() {
     const { proxy } = getCurrentInstance() as any;
-    const outerVisible = ref(false); // 最外层弹框
-    const innerVisible = ref(false); // 产品详情弹框
-    const logoUrl = require("../../static/images/dialogImg.png"); // 标题logo图标
-    const searchVal = ref<string>(""); // 顶部查询字段
-    let uploadShow = ref<boolean>(false)
-    //上传对话框
-    let uploadHandle = () => {
-      uploadShow.value = !uploadShow.value
-    }
-    // 产品列表
+    const outerVisible = ref(false);
+    const innerVisible = ref(false);
+    const searchVal = ref<string>("");
+    const logoUrl = require("../../static/images/dialogImg.png");
+    let currentId = ref<string>("");
+    let uploadShow = ref<boolean>(false);
     let list = ref([]);
-    // 当前查询详情的数据id
-    let currentId = ref("");
-    // 菜单节点改变
-    let changeHandle = () => {
-      let nodesInfo = proxy.$refs["menuList"].getCheckedNodes()[0];
-      console.log(nodesInfo.data, "节点发生改变触发");
-      let { value } = nodesInfo.data;
-      let filterList = productsList.filter((item) => item.pId == value);
-      list.value = filterList[0] ? filterList[0].content : [];
-      console.log(list.value, "获取对应产品列表");
+    const openDetails = (id) => {
+      currentId.value = id;
+      innerVisible.value = true;
     };
-    // 显示产品弹框
-    let openDetails = (id) => {
-      currentId.value = id
-      innerVisible.value = true
-      console.log(innerVisible.value)
-    };
-    // 隐藏产品弹框
-    let changeInnerVisible = (val) => {
-      currentId.value = ""
-      innerVisible.value = false;
-      val && (outerVisible.value = false)
-    };
-    //关闭对话框
-    let handleClose = () => {
-      bus.emit('closePart',!outerVisible.value)
-    };
-    // 格式化溢出文本
     const ellipsis = (value) => {
       if (!value) return "";
       if (value.length > 30) {
@@ -133,85 +170,119 @@ export default defineComponent({
       }
       return value;
     };
+    const changeInnerVisible = (val) => {
+      currentId.value = "";
+      innerVisible.value = false;
+      val && (outerVisible.value = false);
+    };
+    const uploadHandle = () => {
+      uploadShow.value = !uploadShow.value;
+    };
+    const changeHandle = () => {
+      let nodesInfo = proxy.$refs["menuList"].getCheckedNodes()[0];
+      console.log(nodesInfo.data, "节点发生改变触发");
+      let { value } = nodesInfo.data;
+      let filterList = productsList.filter((item) => item.pId == value);
+      list.value = filterList[0] ? filterList[0].content : [];
+      console.log(list.value, "获取对应产品列表");
+    };
+    const handleClose = () => {
+        bus.emit('closePart',!outerVisible.value)
+    };
+
     onMounted(() => {
       let filterList = productsList.filter((item) => item.pId == "0010101");
       list.value = filterList[0] ? filterList[0].content : [];
       console.log(list.value, "获取对应产品列表");
 
-      bus.on('part',value => {
-        outerVisible.value = value as boolean
-      })
+      bus.on("part", (value) => {
+        console.log(value,'111');
+        
+        outerVisible.value = true;
+      });
     });
+
     return {
-      handleClose,
       outerVisible,
       innerVisible,
+      handleClose,
       logoUrl,
       searchVal,
       lineImgs,
-      menuList,
-      list,
-      changeHandle,
       openDetails,
-      changeInnerVisible,
-      ellipsis,
-      currentId,
+      menuList,
+      productsList,
+      changeHandle,
+      list,
       uploadHandle,
-      uploadShow
+      ellipsis,
+      uploadShow,
+      currentId,
+      changeInnerVisible,
     };
   },
-  components: {
-    ShowDialog,
-    UploadDia
-},
-});
+  components: { ShowDialog, UploadDia },
+};
 </script>
+
 <style>
 .el-cascader-panel.is-bordered {
   border: none;
   height: 420px;
 }
+
 .el-cascader-menu {
   min-width: 20px;
 }
+
 .el-dialog__body {
   padding: 0 0 20px 0;
 }
+
 .el-dialog__header {
 }
+
 .el-cascader-node {
   padding: 0 15px 0 0;
 }
+
 .searchBox {
   text-align: center;
   padding-bottom: 15px;
 }
+
 .searchBox .el-input__inner {
   width: 400px !important;
   border-radius: 7px;
   /* height: 45px !important; */
 }
+
 .searchBox .el-input-group__append,
 .el-input-group__prepend {
   background: none;
   border: none;
   padding: 0 12px;
 }
+
 .dialogImg {
   border-radius: 30px;
 }
+
 .el-input-group__prepend {
   font-size: 23px;
   line-height: 5px;
 }
+
 .recWrap .el-col {
   height: 150px;
   padding: 10px 10px;
 }
+
 .ulBox {
   height: 420px;
   overflow-y: scroll;
 }
+
 .ulBox::-webkit-scrollbar {
   width: 6px;
   background-color: #f5f5f5;
@@ -221,6 +292,7 @@ export default defineComponent({
   background-color: #c1c1c1;
   border-radius: 6px;
 }
+
 .hiddenText {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -232,11 +304,13 @@ export default defineComponent({
   color: #999;
   font-size: 13px;
 }
+
 .nameSty {
   text-align: left;
   line-height: 30px;
   font-size: 15px;
 }
+
 .liSty {
   width: 190px;
   float: left;
@@ -247,9 +321,11 @@ export default defineComponent({
   text-align: center;
   cursor: pointer;
 }
+
 .liSty:hover {
   border-color: #409eff;
 }
+
 .lineImg {
   width: 100%;
   height: 100%;
@@ -257,11 +333,14 @@ export default defineComponent({
   border-color: rgba(0, 0, 0, 0);
   cursor: pointer;
 }
+
 .lineImg:hover {
   border: 1px solid #409eff;
 }
+
 li .el-icon-plus {
   font-size: 70px;
-  line-height: 180px
+  line-height: 180px;
 }
 </style>
+

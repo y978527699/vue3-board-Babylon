@@ -1,6 +1,6 @@
 <template>
   <div class="wrap">
-    <Product></Product>
+    <PartStore></PartStore>
     <MiniProduct></MiniProduct>
     <!-- <Preview></Preview> -->
     <BoxDialog class="BoxDialog"></BoxDialog>
@@ -10,18 +10,24 @@
 </template>
 
 <script>
-import MiniProduct from '../../components/product/miniProduct/miniProduct.vue'
+import MiniProduct from "../../components/product/miniProduct/miniProduct.vue";
 import BoxDialog from "./tools/boxDialog.vue";
 import BabylonScene from "./BabylonScene.vue";
-import PanelHandle from './tools/panelHandle'
-import Preview from './tools/preview/preview.vue'
-import Product from '../../components/product/product.vue'
+import PanelHandle from "./tools/panelHandle";
+import Preview from "./tools/preview/preview.vue";
+import PartStore from "../../components/product/partStore.vue";
 export default {
-  components: { BoxDialog, BabylonScene,PanelHandle,Preview,Product, MiniProduct },
-  setup(){
-    return {
-    }
-  }
+  components: {
+    BoxDialog,
+    BabylonScene,
+    PanelHandle,
+    Preview,
+    MiniProduct,
+    PartStore,
+  },
+  setup() {
+    return {};
+  },
 };
 </script>
 

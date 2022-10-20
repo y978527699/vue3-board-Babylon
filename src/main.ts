@@ -4,8 +4,9 @@ import router from "./router";
 import store from "./store";
 import "./styles/index.scss";
 import "@/styles/color/index.scss";
-import ElementPlus from "element-plus";
-import "element-plus/lib/theme-chalk/index.css";
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
+
 // 国际化
 import { createI18n } from "vue-i18n";
 import messages from "@/utils/language";

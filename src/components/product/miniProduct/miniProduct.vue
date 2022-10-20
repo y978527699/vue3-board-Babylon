@@ -5,7 +5,6 @@
       title="替换配件"
       :draggable="true"
       width="18%"
-      top="25vh"
     >
       <ul class="ulBox" v-if="list.length > 0">
         <li
@@ -80,7 +79,8 @@ export default {
 }
 .replaceWrap .el-dialog {
   margin: 0;
-  margin-right: 80px;
+  margin-right: 90px;
+  margin-top: 200px;
   float: right;
   height: 400px;
   overflow: hidden;
@@ -89,8 +89,8 @@ export default {
   background-color: rgba(0, 0, 0, 0);
 }
 .replaceWrap .el-dialog__headerbtn {
-  top: 7px;
-  right: 15px;
+  top: 0;
+  right: 0;
 }
 .replaceWrap .el-dialog__header {
   padding: 10px 20px 5px 0px
