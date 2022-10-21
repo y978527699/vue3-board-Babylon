@@ -4,6 +4,17 @@ function resolve(dir) {
 }
 
 module.exports = {
+    configureWebpack: {
+        module: {
+            rules: [
+                {
+                    test: /\.mjs$/,
+                    include: /node_modules/,
+                    type: "javascript/auto"
+                }
+            ]
+        }
+    },
     chainWebpack: config => {
         // 清除svg默认配置对./src/icons文件夹的处理
         config.module
@@ -35,7 +46,7 @@ module.exports = {
             })
             .end()
     },
-    devServer:{
-        open:true
+    devServer: {
+        open: true
     }
 }

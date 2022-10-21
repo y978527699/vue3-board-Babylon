@@ -6,9 +6,10 @@
     v-model="outerVisible"
     id="partStore"
     width="80%"
-    top="8vh"
+    top="3vh"
     @close="handleClose"
     :close-on-press-escape="false"
+    class="partSDia"
   >
     <template #title>
       <div class="mt-4 searchBox">
@@ -32,7 +33,7 @@
     </template>
 
     <template #default>
-      <el-row class="recWrap">
+      <!-- <el-row class="recWrap">
         <el-col
           :span="24 / lineImgs.length"
           v-for="(item, index) in lineImgs"
@@ -44,7 +45,17 @@
             @click="openDetails(item.id)"
           />
         </el-col>
-      </el-row>
+      </el-row> -->
+
+      <el-carousel :interval="4000" type="card" height="200px">
+        <el-carousel-item v-for="item in lineImgs" :key="item">
+          <el-image
+            class="lineImg"
+            :src="item.img"
+            @click="openDetails(item.id)"
+          />
+        </el-carousel-item>
+      </el-carousel>
 
       <el-row>
         <el-col :span="6">
@@ -194,6 +205,11 @@ export default {
 </script>
 
 <style>
+.partSDia {
+  height: 90%;
+  overflow: hidden;
+}
+
 .el-cascader-panel.is-bordered {
   border: none;
   height: 420px;
@@ -316,6 +332,22 @@ li .el-icon-plus {
 
 .el-input-group__prepend {
   box-shadow: none;
+}
+
+.partStore .el-carousel__item h3 {
+  color: #475669;
+  opacity: 0.75;
+  line-height: 200px;
+  margin: 0;
+  text-align: center;
+}
+
+.partStore .el-carousel__item:nth-child(2n) {
+  background-color: #99a9bf;
+}
+
+.partStore .el-carousel__item:nth-child(2n + 1) {
+  background-color: #d3dce6;
 }
 </style>
 

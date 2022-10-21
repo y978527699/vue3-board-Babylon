@@ -11,15 +11,15 @@
     <el-backtop :right="310" :bottom="60" target=".detailsBox" />
     <div class="bannerWrap">
       <!-- <el-row style="height:250px" v-show="isCanShow"> -->
-      <el-row style="height:250px">
+      <el-row style="height: 250px">
         <el-col :span="12"
           ><el-carousel trigger="click" height="250px">
             <el-carousel-item v-for="item in goodsData?.bannerImgs" :key="item">
-              <img style="width:100%;height: 100%;" :src="item" />
+              <img style="width: 100%; height: 100%" :src="item" />
             </el-carousel-item> </el-carousel
         ></el-col>
         <el-col :span="12" id="canCol">
-          <canvas id="partStore" style="height:100%"></canvas>
+          <canvas id="partCanvas" style="height: 100%"></canvas>
         </el-col>
       </el-row>
       <!-- <el-carousel trigger="click" height="250px" v-show="!isCanShow">
@@ -80,7 +80,7 @@
                     goodsData?.evaluate && goodsData?.evaluate.length
                   }})</el-col
                 >
-                <el-col :span="12" style="text-align: right;">
+                <el-col :span="12" style="text-align: right">
                   <el-link :underline="false" type="warning" href="javascript:;"
                     >查看全部 ></el-link
                   >
@@ -148,7 +148,7 @@ export default defineComponent({
   props: ["innerVisible", "currentId"],
   setup(props, context) {
     let handleCan = () => {
-      let partCan = document.getElementById("partStore") as HTMLCanvasElement;
+      let partCan = document.getElementById("partCanvas") as HTMLCanvasElement;
       let partBb = new partBblon(partCan);
     };
     let visible = true;
@@ -172,13 +172,13 @@ export default defineComponent({
     };
     onMounted(() => {
       setTimeout(() => {
-          handleCan();
-        }, 1);
-    })
+        handleCan();
+      }, 1);
+    });
     watch(
       () => props.currentId,
       (newVal, oldVal) => {
-        console.log(newVal,'newValnewValnewVal')
+        console.log(newVal, "newValnewValnewVal");
         goodsId.value = newVal;
         getData();
       },
