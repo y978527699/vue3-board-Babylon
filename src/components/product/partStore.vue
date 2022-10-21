@@ -1,7 +1,10 @@
 <template>
-  <el-button text @click="outerVisible = true" v-show="false">open the outer Dialog</el-button>
+  <el-button text @click="outerVisible = true" v-show="false"
+    >open the outer Dialog</el-button
+  >
   <el-dialog
     v-model="outerVisible"
+    id="partStore"
     width="80%"
     top="8vh"
     @close="handleClose"
@@ -20,63 +23,47 @@
           placeholder="请输入配件"
           class="input-with-select"
         >
-
           <template #prepend>
-             有屋配件库
+            有屋配件库
             <!-- <el-button :icon="Search" /> -->
-
           </template>
-
         </el-input>
-
       </div>
-
     </template>
 
     <template #default>
-
       <el-row class="recWrap">
-
         <el-col
           :span="24 / lineImgs.length"
           v-for="(item, index) in lineImgs"
           :key="index"
         >
-
           <el-image
             class="lineImg"
             :src="item.img"
             @click="openDetails(item.id)"
           />
-
         </el-col>
-
       </el-row>
 
       <el-row>
-
         <el-col :span="6">
-
           <el-cascader-panel
             ref="menuList"
             :options="menuList"
             @change="changeHandle"
             model-value="0010101"
           />
-
         </el-col>
 
         <el-col :span="18">
-
           <ul class="ulBox" v-if="list.length > 0">
-
             <li
               class="liSty"
               v-for="item in list"
               :key="item.id"
               @click="openDetails(item.id)"
             >
-
               <el-image
                 style="height: 120px"
                 :src="item.src"
@@ -92,35 +79,21 @@
                 trigger="hover"
                 :content="item.introduce"
               >
-
                 <template #reference>
-
                   <span class="hiddenText">{{ ellipsis(item.introduce) }}</span>
-
                 </template>
-
               </el-popover>
 
               <span class="hiddenText" v-else>{{ item.introduce }}</span>
-
             </li>
 
             <li class="liSty" @click="uploadHandle">
-
-              <div>
-
-                <!-- <i class="el-icon-plus"></i> -->
-
-              </div>
-
+              <el-icon><Plus /></el-icon>
             </li>
-
           </ul>
 
           <el-empty v-else description="暂无数据" :image-size="200" />
-
         </el-col>
-
       </el-row>
 
       <ShowDialog
@@ -132,22 +105,17 @@
       <!-- 上传 -->
 
       <UploadDia v-if="uploadShow" @changeDiaVisible="uploadHandle"></UploadDia>
-
     </template>
   </el-dialog>
-
 </template>
 
 <script lang="ts">
 import { getCurrentInstance, onMounted, ref } from "vue";
 import ShowDialog from "./showDialog.vue";
 import UploadDia from "./uploadDia.vue";
-import {
-  menuList,
-  productsList,
-  lineImgs,
-} from "./publicData";
+import { menuList, productsList, lineImgs } from "./publicData";
 import bus from "@/views/board/utils/bus";
+import { Plus } from "@element-plus/icons-vue";
 
 export default {
   setup() {
@@ -187,7 +155,7 @@ export default {
       console.log(list.value, "获取对应产品列表");
     };
     const handleClose = () => {
-        bus.emit('closePart',!outerVisible.value)
+      bus.emit("closePart", !outerVisible.value);
     };
 
     onMounted(() => {
@@ -196,8 +164,8 @@ export default {
       console.log(list.value, "获取对应产品列表");
 
       bus.on("part", (value) => {
-        console.log(value,'111');
-        
+        console.log(value, "111");
+
         outerVisible.value = true;
       });
     });
@@ -221,7 +189,7 @@ export default {
       changeInnerVisible,
     };
   },
-  components: { ShowDialog, UploadDia },
+  components: { ShowDialog, UploadDia, Plus },
 };
 </script>
 
@@ -237,9 +205,6 @@ export default {
 
 .el-dialog__body {
   padding: 0 0 20px 0;
-}
-
-.el-dialog__header {
 }
 
 .el-cascader-node {
@@ -313,6 +278,7 @@ export default {
 
 .liSty {
   width: 190px;
+  height: 220px;
   float: left;
   margin-left: 20px;
   margin-bottom: 20px;
@@ -341,6 +307,15 @@ export default {
 li .el-icon-plus {
   font-size: 70px;
   line-height: 180px;
+}
+
+.liSty .el-icon {
+  font-size: 70px;
+  margin-top: 50px;
+}
+
+.el-input-group__prepend {
+  box-shadow: none;
 }
 </style>
 
