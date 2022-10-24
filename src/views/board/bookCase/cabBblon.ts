@@ -1,6 +1,12 @@
 import { Engine, Mesh, Scene } from "@babylonjs/core";
 import * as BABYLON from "@babylonjs/core";
 import earcut from "earcut";
+import {
+  AdvancedDynamicTexture,
+  Control,
+  InputText,
+  StackPanel,
+} from "@babylonjs/gui";
 
 export default class cabBblon {
   canvas: HTMLCanvasElement;
@@ -21,6 +27,8 @@ export default class cabBblon {
   CreateScene() {
     const scene = new Scene(this.engine);
 
+    scene.clearColor = new BABYLON.Color4(0, 0, 0, 0.1);
+
     const localAxes = new BABYLON.AxesViewer(scene, 200);
     const camera = this.createCamera();
     const light = this.createLight();
@@ -30,13 +38,21 @@ export default class cabBblon {
     let hiLight = new BABYLON.HighlightLayer("hl", scene);
 
     scene.onPointerObservable.add((pointerInfo) => {
+      let pickMesh = pointerInfo.pickInfo
+        ? pointerInfo.pickInfo.pickedMesh
+        : null;
       if (pointerInfo.type == 64) {
-        console.log(pointerInfo.pickInfo.pickedMesh);
+        hiLight.removeAllMeshes();
         // pointerInfo.pickInfo.pickedMesh.material.alpha = 0.5;
-        let pickMesh = pointerInfo.pickInfo
-          ? pointerInfo.pickInfo.pickedMesh
-          : null;
         hiLight.addMesh(pickMesh as Mesh, new BABYLON.Color3(0, 255, 0));
+
+        this.createCabGUI(pickMesh);
+      }
+
+      if (pointerInfo.type == 1) {
+        if (pickMesh == null) {
+          hiLight.removeAllMeshes();
+        }
       }
     });
 
@@ -186,5 +202,63 @@ export default class cabBblon {
       let hardR2 = hardR1.clone("hardR2");
       hardR2.position.z = this.depth / 1.5;
     });
+  }
+
+  advancedTexture;
+  createCabGUI(mesh) {
+    // let width = mesh.getWorldMatrix().m[14];
+    // let depth = mesh.getWorldMatrix().m[12];
+    // let height = mesh.getWorldMatrix().m[13];
+    var advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+    var panel = new StackPanel();
+    panel.width = "150px";
+    panel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+    panel.verticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;
+
+    const widthInp = new InputText();
+    widthInp.width = "150px";
+    widthInp.height = "50px";
+    widthInp.text = "长度: 1200";
+    widthInp.color = "white";
+    widthInp.focusedBackground = "orange";
+    widthInp.background = "chocolate ";
+    // widthInp.onBlurObservable.add((itemInp1) => {
+    //   width = Number(itemInp1.text.slice(7));
+    //   ground.scaling = new BABYLON.Vector3(width / 40, 1, height / 30);
+    //   widthInp.text = `width: ${itemInp1.text.slice(7)}`;
+    // });
+    panel.addControl(widthInp);
+
+    const depthInp = new InputText();
+    depthInp.width = "150px";
+    depthInp.height = "50px";
+    depthInp.text = "宽度: 800";
+    depthInp.color = "white";
+    depthInp.focusedBackground = "orange";
+    depthInp.background = "chocolate";
+    // heightInp.onBlurObservable.add((itemInp2) => {
+    //   height = Number(itemInp2.text.slice(7));
+    //   ground.scaling = new BABYLON.Vector3(width / 40, 1, height / 30);
+    //   heightInp.text = `height:${itemInp2.text.slice(7)}`;
+    // });
+    panel.addControl(depthInp);
+
+    const heightInp = new InputText();
+    heightInp.width = "150px";
+    heightInp.height = "50px";
+    heightInp.text = "厚度: 18";
+    heightInp.color = "white";
+    heightInp.focusedBackground = "orange";
+    heightInp.background = "chocolate";
+    // heightInp.onBlurObservable.add((itemInp2) => {
+    //   height = Number(itemInp2.text.slice(7));
+    //   ground.scaling = new BABYLON.Vector3(width / 40, 1, height / 30);
+    //   heightInp.text = `height:${itemInp2.text.slice(7)}`;
+    // });
+    panel.addControl(heightInp);
+
+    advancedTexture.addControl(panel);
+    this.advancedTexture = advancedTexture;
   }
 }

@@ -5,8 +5,9 @@
     append-to-body
     @close="handleClose"
     width="50%"
-    top="8vh"
+    top="3vh"
     :destroy-on-close="true"
+    :show-close="false"
   >
     <el-backtop :right="310" :bottom="60" target=".detailsBox" />
     <div class="bannerWrap">
@@ -40,6 +41,14 @@
           <div class="goodInfo">
             <!-- <h1 class="goodName">{{ goodsData?.name }}</h1> -->
             <span class="goodInt">{{ goodsData?.introduce }}</span>
+            <el-button
+              @click="previewVisible = true"
+              v-if="goodsData?.draw != ''"
+              >预览图纸</el-button
+            >
+            <el-dialog v-model="previewVisible" class="previewImg">
+              <img w-full :src="goodsData?.draw" alt="预览图纸" />
+            </el-dialog>
           </div>
           <el-divider />
           <div class="specs">
@@ -147,6 +156,7 @@ export default defineComponent({
   components: { CustomMap, Baidu },
   props: ["innerVisible", "currentId"],
   setup(props, context) {
+    let previewVisible = ref(false);
     let handleCan = () => {
       let partCan = document.getElementById("partCanvas") as HTMLCanvasElement;
       let partBb = new partBblon(partCan);
@@ -156,7 +166,10 @@ export default defineComponent({
     let goodsId = ref("");
     const activeName = ref<string>("evaluate");
     const getData = () => {
-      let filterData = goods.filter((item) => {
+      let goodsInfo = JSON.parse(localStorage.getItem("goodsInfo"))
+        ? JSON.parse(localStorage.getItem("goodsInfo"))
+        : goods;
+      let filterData = goodsInfo.filter((item) => {
         return item.id == goodsId.value;
       });
       goodsData.value = filterData ? filterData[0] : {};
@@ -203,13 +216,14 @@ export default defineComponent({
       handleJump,
       handleCan,
       // isCanShow,
+      previewVisible,
     };
   },
 });
 </script>
 <style>
 .detailsBox {
-  height: 680px !important;
+  height: 715px !important;
   overflow: scroll;
 }
 .detailsBox::-webkit-scrollbar {
@@ -321,6 +335,7 @@ export default defineComponent({
 .userEva {
   margin-bottom: 20px;
 }
+
 .specs {
   margin-bottom: 20px;
 }
@@ -358,5 +373,10 @@ export default defineComponent({
   line-height: 70px;
   color: white;
   font-size: 25px;
+}
+
+.previewImg img {
+  width: 100%;
+  height: 100%;
 }
 </style>

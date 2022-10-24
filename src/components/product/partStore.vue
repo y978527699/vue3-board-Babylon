@@ -15,7 +15,7 @@
       <div class="mt-4 searchBox">
         <el-image
           class="dialogImg"
-          style="width: 30px; height: 30px"
+          style="width: 35px; height: 35px"
           :src="logoUrl"
         />
 
@@ -24,10 +24,10 @@
           placeholder="请输入配件"
           class="input-with-select"
         >
-          <template #prepend>
-            有屋配件库
-            <!-- <el-button :icon="Search" /> -->
+          <template #prefix>
+            <el-icon><Search /></el-icon>
           </template>
+          <template #prepend> 有屋配件库 </template>
         </el-input>
       </div>
     </template>
@@ -47,7 +47,12 @@
         </el-col>
       </el-row> -->
 
-      <el-carousel :interval="4000" type="card" height="200px">
+      <el-carousel
+        :interval="4000"
+        type="card"
+        height="200px"
+        indicator-position="none"
+      >
         <el-carousel-item v-for="item in lineImgs" :key="item">
           <el-image
             class="lineImg"
@@ -64,11 +69,12 @@
             :options="menuList"
             @change="changeHandle"
             model-value="0010101"
+            class="mt5"
           />
         </el-col>
 
         <el-col :span="18">
-          <ul class="ulBox" v-if="list.length > 0">
+          <ul class="ulBox mt5" v-if="list.length > 0">
             <li
               class="liSty"
               v-for="item in list"
@@ -115,7 +121,11 @@
 
       <!-- 上传 -->
 
-      <UploadDia v-if="uploadShow" @changeDiaVisible="uploadHandle"></UploadDia>
+      <UploadDia
+        v-if="uploadShow"
+        @changeDiaVisible="uploadHandle"
+        :pId="pId"
+      ></UploadDia>
     </template>
   </el-dialog>
 </template>
@@ -126,7 +136,8 @@ import ShowDialog from "./showDialog.vue";
 import UploadDia from "./uploadDia.vue";
 import { menuList, productsList, lineImgs } from "./publicData";
 import bus from "@/views/board/utils/bus";
-import { Plus } from "@element-plus/icons-vue";
+import { Plus, Search } from "@element-plus/icons-vue";
+import { ElMessage } from "element-plus";
 
 export default {
   setup() {
@@ -138,6 +149,7 @@ export default {
     let currentId = ref<string>("");
     let uploadShow = ref<boolean>(false);
     let list = ref([]);
+    let pId = ref("");
     const openDetails = (id) => {
       currentId.value = id;
       innerVisible.value = true;
@@ -156,9 +168,14 @@ export default {
     };
     const uploadHandle = () => {
       uploadShow.value = !uploadShow.value;
+      let newList = JSON.parse(localStorage.getItem("productsList"));
+      let filterList = newList.filter((item) => item.pId == pId.value);
+      list.value = filterList[0] ? filterList[0].content : [];
+      console.log(list.value, "获取对应产品列表");
     };
     const changeHandle = () => {
       let nodesInfo = proxy.$refs["menuList"].getCheckedNodes()[0];
+      pId.value = nodesInfo.data.value;
       console.log(nodesInfo.data, "节点发生改变触发");
       let { value } = nodesInfo.data;
       let filterList = productsList.filter((item) => item.pId == value);
@@ -170,13 +187,18 @@ export default {
     };
 
     onMounted(() => {
-      let filterList = productsList.filter((item) => item.pId == "0010101");
+      pId.value = "0010101";
+      // let filterList = productsList.filter((item) => item.pId == pId.value);
+      // list.value = filterList[0] ? filterList[0].content : [];
+      // console.log(list.value, "获取对应产品列表");
+      let dataList = JSON.parse(localStorage.getItem("productsList"))
+        ? JSON.parse(localStorage.getItem("productsList"))
+        : productsList;
+      let filterList = dataList.filter((item) => item.pId == pId.value);
       list.value = filterList[0] ? filterList[0].content : [];
       console.log(list.value, "获取对应产品列表");
 
       bus.on("part", (value) => {
-        console.log(value, "111");
-
         outerVisible.value = true;
       });
     });
@@ -198,13 +220,17 @@ export default {
       uploadShow,
       currentId,
       changeInnerVisible,
+      pId,
     };
   },
-  components: { ShowDialog, UploadDia, Plus },
+  components: { ShowDialog, UploadDia, Plus, Search },
 };
 </script>
 
 <style>
+.el-image {
+  position: unset;
+}
 .partSDia {
   height: 90%;
   overflow: hidden;
@@ -238,6 +264,10 @@ export default {
   /* height: 45px !important; */
 }
 
+.searchBox .el-input {
+  width: 500px;
+}
+
 .searchBox .el-input-group__append,
 .el-input-group__prepend {
   background: none;
@@ -245,8 +275,15 @@ export default {
   padding: 0 12px;
 }
 
+.searchBox .el-input-group--prepend > .el-input__wrapper {
+  border-radius: 30px;
+  height: 35px;
+}
+
 .dialogImg {
   border-radius: 30px;
+  position: relative;
+  top: 10px;
 }
 
 .el-input-group__prepend {
@@ -260,6 +297,7 @@ export default {
 }
 
 .ulBox {
+  margin-top: 5px;
   height: 420px;
   overflow-y: scroll;
 }
@@ -284,6 +322,10 @@ export default {
   text-align: left;
   color: #999;
   font-size: 13px;
+}
+
+.mt5 {
+  margin-top: 5px;
 }
 
 .nameSty {

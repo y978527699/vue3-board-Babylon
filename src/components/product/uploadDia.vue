@@ -25,13 +25,13 @@
         <el-form-item label="规格" prop="specs">
           <el-tag
             v-for="tag in uploadForm.specs"
-            :key="tag"
+            :key="tag.sid"
             class="mx-1"
             closable
             :disable-transitions="false"
-            @close="specsClose(tag)"
+            @close="specsClose(tag.sname)"
           >
-            {{ tag }}
+            {{ tag.sname }}
           </el-tag>
           <el-input
             v-if="specsInpShow"
@@ -41,6 +41,7 @@
             size="small"
             @keyup.enter="handleSpecsConfirm"
             @blur="handleSpecsConfirm"
+            placeholder="回车或离焦添加规格"
           />
           <el-button
             v-else
@@ -58,6 +59,7 @@
             :auto-upload="false"
             v-model:file-list="uploadForm.bannerImgs"
             :multiple="true"
+            :accept="'.jpg'"
           >
             <el-icon><Plus /></el-icon>
 
@@ -98,6 +100,8 @@
             :on-exceed="handleExceed"
             :auto-upload="false"
             :v-model:file-list="uploadForm.video"
+            :accept="'.mp4'"
+            :on-success="handleChange"
           >
             <template #trigger>
               <el-button type="primary">选择视频</el-button>
@@ -184,6 +188,7 @@
 <script lang="ts">
 import {
   ElInput,
+  ElMessage,
   FormInstance,
   FormRules,
   genFileId,
@@ -193,9 +198,11 @@ import {
 import { defineComponent, nextTick, reactive, ref, onMounted } from "vue";
 import type { UploadProps, UploadUserFile } from "element-plus";
 import { Plus, Delete, ZoomIn } from "@element-plus/icons-vue";
+import { goods, productsList } from "./publicData";
 
 export default defineComponent({
   components: { Plus, Delete, ZoomIn },
+  props: ["pId"],
   setup(props, context) {
     let dialogVisible = true;
     let ruleFormRef = ref<FormInstance>();
@@ -212,17 +219,46 @@ export default defineComponent({
       await formEl.validate((valid, fields) => {
         if (valid) {
           console.log("submit!");
+          uploadForm.id = "103";
+
+          let productData = JSON.parse(localStorage.getItem("productsList"))
+            ? JSON.parse(localStorage.getItem("productsList"))
+            : productsList;
+          productData.forEach((item) => {
+            if (item.pId == props.pId) {
+              item.content.push({
+                id: uploadForm.id,
+                name: uploadForm.name,
+                src: uploadForm.bannerImgs[0].url,
+                introduce: uploadForm.introduce,
+              });
+            }
+          });
+          localStorage.setItem("productsList", JSON.stringify(productData));
+
+          uploadForm.bannerImgs = uploadForm.bannerImgs.map((item) => {
+            return item.url;
+          });
+          uploadForm.introImgs = uploadForm.bannerImgs;
+          goods.push(uploadForm);
+
+          localStorage.setItem("goodsInfo", JSON.stringify(goods));
+          closeDia();
+          ElMessage({
+            message: "Congrats, this is a success message.",
+            type: "success",
+          });
         } else {
           console.log("error submit!", fields);
         }
       });
-      console.log(uploadForm);
     };
     const resetForm = (ruleFormRef) => {
       if (!ruleFormRef) return;
       ruleFormRef.resetFields();
     };
     const uploadForm = reactive({
+      id: "",
       name: "",
       introduce: "",
       bannerImgs: [],
@@ -230,6 +266,37 @@ export default defineComponent({
       introImgs: [],
       video: "",
       draw: "",
+      evaluate: [
+        {
+          uid: 0,
+          uname: "张三",
+          headImg:
+            "https://www.meishujixun.com/uploads/58a72efc485a5d8ac0db25b1d8250546.jpg",
+          star: 4,
+          date: "2022/10/1",
+          content: "配件很好，很不错！我不是水军，我是火军",
+        },
+        {
+          uid: 1,
+          uname: "弟弟",
+          headImg:
+            "https://www.meishujixun.com/uploads/58a72efc485a5d8ac0db25b1d8250546.jpg",
+          star: 2,
+          date: "2022/10/1",
+          content:
+            "我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军",
+        },
+        {
+          uid: 1,
+          uname: "弟弟",
+          headImg:
+            "https://www.meishujixun.com/uploads/58a72efc485a5d8ac0db25b1d8250546.jpg",
+          star: 2,
+          date: "2022/10/1",
+          content:
+            "我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军",
+        },
+      ],
     });
     const rules = reactive<FormRules>({
       name: [
@@ -257,12 +324,13 @@ export default defineComponent({
     });
 
     //规格方法
+    let sid = ref(0);
     let specsInpShow = ref<boolean>(false);
     let specsValue = ref<string>("");
     const specsRef = ref<InstanceType<typeof ElInput>>();
     let handleSpecsConfirm = () => {
       if (specsValue.value) {
-        uploadForm.specs.push(specsValue.value);
+        uploadForm.specs.push({ sid: sid.value++, sname: specsValue.value });
       }
       specsInpShow.value = false;
       specsValue.value = "";
@@ -291,12 +359,17 @@ export default defineComponent({
     //上传视频
     const upVideo = ref<UploadInstance>();
     const handleExceed: UploadProps["onExceed"] = (files) => {
+      console.log(files);
+
       upVideo.value!.clearFiles();
       const file = files[0] as UploadRawFile;
       file.uid = genFileId();
       upVideo.value!.handleStart(file);
+      console.log(upVideo.value);
     };
-
+    const handleChange = (uploadFile, uploadFiles) => {
+      console.log(uploadFile, uploadFiles, "uploadFile, uploadFiles");
+    };
     //预览图纸
     let DrawDiaVisible = ref(false);
     const DrawUrl = ref("");
@@ -331,6 +404,7 @@ export default defineComponent({
       handleSpecsInp,
       specsRef,
       handleExceed,
+      handleChange,
       upVideo,
       handleDrawPreview,
       DrawDiaVisible,

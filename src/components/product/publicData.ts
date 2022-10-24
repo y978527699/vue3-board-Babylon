@@ -440,7 +440,7 @@ const goods = [
         headImg:
           "https://www.meishujixun.com/uploads/58a72efc485a5d8ac0db25b1d8250546.jpg",
         star: 4,
-        date: '2022/10/1',
+        date: "2022/10/1",
         content: "配件很好，很不错！我不是水军，我是火军",
       },
       {
@@ -449,7 +449,7 @@ const goods = [
         headImg:
           "https://www.meishujixun.com/uploads/58a72efc485a5d8ac0db25b1d8250546.jpg",
         star: 2,
-        date: '2022/10/1',
+        date: "2022/10/1",
         content:
           "我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军",
       },
@@ -459,12 +459,12 @@ const goods = [
         headImg:
           "https://www.meishujixun.com/uploads/58a72efc485a5d8ac0db25b1d8250546.jpg",
         star: 2,
-        date: '2022/10/1',
+        date: "2022/10/1",
         content:
           "我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军",
       },
     ],
-    draw: require("@/static/images/hardware/hide/hiDraw.jpg")
+    draw: require("@/static/images/hardware/hide/hiDraw.jpg"),
   },
   {
     id: "101",
@@ -510,7 +510,7 @@ const goods = [
         headImg:
           "https://www.meishujixun.com/uploads/58a72efc485a5d8ac0db25b1d8250546.jpg",
         star: 4,
-        date: '2022/10/1',
+        date: "2022/10/1",
         content: "配件很好，很不错！我不是水军，我是火军",
       },
       {
@@ -519,7 +519,7 @@ const goods = [
         headImg:
           "https://www.meishujixun.com/uploads/58a72efc485a5d8ac0db25b1d8250546.jpg",
         star: 2,
-        date: '2022/10/1',
+        date: "2022/10/1",
         content:
           "我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军",
       },
@@ -529,25 +529,30 @@ const goods = [
         headImg:
           "https://www.meishujixun.com/uploads/58a72efc485a5d8ac0db25b1d8250546.jpg",
         star: 2,
-        date: '2022/10/1',
+        date: "2022/10/1",
         content:
           "我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军",
       },
     ],
-    draw: require("@/static/images/hardware/hide/hiDraw.jpg")
+    draw: require("@/static/images/hardware/hide/hiDraw.jpg"),
   },
 ];
 //推荐栏商品
 const lineImgs = [
   {
-    id: '102',
-    img: require("@/static/images/hardware/hide/hi7.jpg")
-  },{
-    id: '101',
-    img: require("@/static/images/partPipe/pipe01.jpg")
-  },{
-    id: '103',
-    img: require("@/static/images/hardware/obvious/obv01.png")
-  }
+    id: "102",
+    name: "克在隐式连接件",
+    img: require("@/static/images/hardware/hide/hi7.jpg"),
+  },
+  {
+    id: "101",
+    name: "显示器支架",
+    img: require("@/static/images/partPipe/pipe01.jpg"),
+  },
+  {
+    id: "103",
+    name: "显式连接件",
+    img: require("@/static/images/hardware/obvious/obv01.png"),
+  },
 ];
-export { menuList, productsList, goods,lineImgs };
+export { menuList, productsList, goods, lineImgs };

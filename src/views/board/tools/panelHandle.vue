@@ -43,11 +43,7 @@
       <template #header>
         <el-row type="flex" :gutter="16" class="rowFlex">
           <el-col :span="7">
-            <!-- <el-image
-                style="width: 100%"
-                src='../../../assets/images/mat1.png'
-              ></el-image
-            > -->
+            <el-image style="width: 100%" :src="boardImg"></el-image>
           </el-col>
           <el-col><h1 class="namePos">板材1</h1></el-col>
         </el-row>
@@ -115,11 +111,11 @@
           <el-tab-pane label="材料" name="material" id="material">
             <div class="matCard">
               <el-card :body-style="{ padding: '0px' }">
-                <!-- <img
-                    :src="getAssetsImages('mat1.png')"
-                    class="image"
-                    style="width: 65px; height: 90px"
-                  /> -->
+                <img
+                  :src="matArr[0]"
+                  class="image"
+                  style="width: 65px; height: 90px"
+                />
                 <div style="padding: 20px 0 20px 35px">
                   <span style="font: bold 15px 微软雅黑">材料1</span>
                   <div class="bottom">
@@ -144,11 +140,11 @@
                 </div>
               </el-card>
               <el-card :body-style="{ padding: '0px' }">
-                <!-- <img
-                    :src="getAssetsImages('mat2.png')"
-                    class="image"
-                    style="width: 65px; height: 90px"
-                  /> -->
+                <img
+                  :src="matArr[1]"
+                  class="image"
+                  style="width: 65px; height: 90px"
+                />
                 <div style="padding: 20px 0 20px 35px">
                   <span style="font: bold 15px 微软雅黑">材料2</span>
                   <div class="bottom">
@@ -173,11 +169,11 @@
                 </div>
               </el-card>
               <el-card :body-style="{ padding: '0px' }">
-                <!-- <el-image
-                style="width: 100%"
-               :src="getAssetsImages('mat2.png')"
-              ></el-image
-            > -->
+                <img
+                  :src="matArr[2]"
+                  class="image"
+                  style="width: 65px; height: 90px"
+                />
                 <div style="padding: 20px 0 20px 35px">
                   <span style="font: bold 15px 微软雅黑">材料3</span>
                   <div class="bottom">
@@ -262,13 +258,19 @@
 <script lang="ts">
 import { defineComponent, ref, reactive, onMounted } from "vue";
 import bus from "../utils/bus";
-import Preview from './preview/preview.vue'
+import Preview from "./preview/preview.vue";
 export default defineComponent({
-  components: {Preview},
+  components: { Preview },
   setup() {
     // let isPreview = ref<boolean>(false)
-    let partCheck = ref<boolean>(false)
-    let url = require('@/static/images/partPipe.jpg')
+    let boardImg = require("@/static/images/mat1.png");
+    let matArr = [
+      require("@/static/images/mat1.png"),
+      require("@/static/images/mat2.png"),
+      require("@/static/images/mat3.png"),
+    ];
+    let partCheck = ref<boolean>(false);
+    let url = require("@/static/images/partPipe.jpg");
     let holeActive = ref<string>("first");
     let checkCard = ref<number>(0);
     let isEdit = ref<boolean>(false);
@@ -291,11 +293,11 @@ export default defineComponent({
       },
     });
 
-    function createPart(){
-      bus.emit('createPart')
+    function createPart() {
+      bus.emit("createPart");
     }
 
-    function imgClick(){
+    function imgClick() {
       // isPreview.value = !isPreview.value
     }
 
@@ -304,9 +306,8 @@ export default defineComponent({
       applyBtn.value = false;
     }
 
-    // function getAssetsImages(name) {
-    // //   return new URL(`/src/assets/images/${name}`, import.meta.url).href;
-
+    // function getAssetsImages(url) {
+    //   return require(url);
     // }
 
     function changeCheck(order, img) {
@@ -342,6 +343,9 @@ export default defineComponent({
       changeCheck,
       holeActive,
       changeSize,
+      boardImg,
+      // getAssetsImages,
+      matArr,
     };
   },
 });
@@ -462,7 +466,7 @@ export default defineComponent({
   justify-content: space-between;
   align-items: center;
 }
-#parts .el-card__body{
+#parts .el-card__body {
   display: flex;
   margin-top: 5px;
 }

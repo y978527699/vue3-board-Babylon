@@ -18,7 +18,6 @@ import {
   InputText,
 } from "@babylonjs/gui";
 import earcut from "earcut";
-import { ElMessage, ElMessageBox } from "element-plus";
 export class BabylonHandle {
   scene: Scene;
   engine: Engine;
@@ -51,12 +50,17 @@ export class BabylonHandle {
     this.engine.runRenderLoop(() => {
       this.scene.render();
     });
+
+    // this.scene.createDefaultCameraOrLight(false, false, false);
+    // var helper = this.scene.createDefaultEnvironment();
+    // helper.setMainColor(BABYLON.Color3.White());
   }
 
   CreateScene(): Scene {
     const scene = new Scene(this.engine);
 
     // const localAxes = new BABYLON.AxesViewer(scene, 50);
+    scene.clearColor = new BABYLON.Color4(0, 0, 0, 0.1);
 
     let camera = new BABYLON.ArcRotateCamera(
       "cmera",
@@ -144,8 +148,6 @@ export class BabylonHandle {
 
       switch (pointerInfo.type) {
         case BABYLON.PointerEventTypes.POINTERDOWN:
-          console.log(pointerInfo.pickInfo);
-          
           if (
             (pointerInfo.pickInfo!.hit && pickMesh?.name == "poly") ||
             pickMesh?.name == "cylinder"
@@ -195,6 +197,28 @@ export class BabylonHandle {
     }
   }
 
+  //天空盒子
+  skyBox() {
+    const skyBox = BABYLON.MeshBuilder.CreateBox(
+        "skyBox",
+        {
+          size: 2000.0,
+        },
+        this.scene
+      ),
+      skyBoxMaterial = new BABYLON.StandardMaterial("skyBox", this.scene);
+    skyBoxMaterial.backFaceCulling = false;
+    skyBoxMaterial.reflectionTexture = new BABYLON.CubeTexture(
+      "../../../static/images/textures/box",
+      this.scene
+    );
+    skyBoxMaterial.reflectionTexture.coordinatesMode =
+      BABYLON.Texture.SKYBOX_MODE;
+    skyBoxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+    skyBoxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+    skyBox.material = skyBoxMaterial;
+  }
+
   //创建初始板材
   createInitialBox(width: number, height: number, depth: number): Mesh {
     this.width = Number(width);
@@ -234,11 +258,11 @@ export class BabylonHandle {
       this.editBox.isVisible = true;
       this.editHoleBox.isVisible = true;
       this.box.isVisible = false;
-      if(this.part){
+      if (this.part) {
         this.part.isVisible = true;
-        this.partHoleArr.forEach(item => {
-          item.isVisible = true
-        })
+        this.partHoleArr.forEach((item) => {
+          item.isVisible = true;
+        });
       }
       this.holeDisArr = this.createGrooMeasureLine(
         this.editHoleBox,
@@ -862,6 +886,14 @@ export class BabylonHandle {
       boxCSG = boxCSG.subtract(holeCSG);
     }
     this.box = boxCSG.toMesh("csgBox", this.boxMaterial, this.scene);
+    BABYLON.Tools.CreateScreenshotUsingRenderTarget(
+      this.engine,
+      this.camera,
+      800,
+      function(data) {
+        console.log(data);
+      }
+    );
 
     // let boxHL = new BABYLON.HighlightLayer("boxHL", this.scene);
     // boxHL.addMesh(this.box, BABYLON.Color3.Red());
@@ -871,19 +903,21 @@ export class BabylonHandle {
 
   //转实体清除所有标识
   clearMes() {
-    if(this.part){
-      this.part.isVisible = false
-      this.partHoleArr.forEach(item => {
-        item.isVisible = false
-      })
+    if (this.part) {
+      this.part.isVisible = false;
+      this.partHoleArr.forEach((item) => {
+        item.isVisible = false;
+      });
     }
-    if(this.holeDisArr){this.holeDisArr.forEach(item => {
-      item.dispose()
-    })}
-    if(this.partDisArr){
-      this.partDisArr.forEach(item => {
-        item.dispose()
-      })
+    if (this.holeDisArr) {
+      this.holeDisArr.forEach((item) => {
+        item.dispose();
+      });
+    }
+    if (this.partDisArr) {
+      this.partDisArr.forEach((item) => {
+        item.dispose();
+      });
     }
     this.editBox.isVisible = false;
     this.editHoleBox.isVisible = false;
@@ -1101,33 +1135,31 @@ export class BabylonHandle {
   partDisArr;
   partWidth;
   parDepth;
-  partHoleArr
+  partHoleArr;
   createPipe(height: number = 400, diameter: number = 60) {
-    let matPath = 'https://img2.baidu.com/it/u=3167412554,2425619194&fm=253&fmt=auto&app=138&f=JPEG?w=700&h=497'
-    
+    let matPath =
+      "https://img2.baidu.com/it/u=3167412554,2425619194&fm=253&fmt=auto&app=138&f=JPEG?w=700&h=497";
+
     const cylinder = BABYLON.MeshBuilder.CreateCylinder(
       "cylinder",
       { height, diameter },
       this.scene
     );
-    if(this.part){
-      let x = this.part.getWorldMatrix().m[12]
-      let z = this.part.getWorldMatrix().m[14]
-      this.part.dispose()
-      matPath = 'https://img1.baidu.com/it/u=2480181462,2609747608&fm=253&fmt=auto&app=138&f=JPEG?w=750&h=500'
-      cylinder.position.x = x
-      cylinder.position.z = z
+    if (this.part) {
+      let x = this.part.getWorldMatrix().m[12];
+      let z = this.part.getWorldMatrix().m[14];
+      this.part.dispose();
+      matPath =
+        "https://img1.baidu.com/it/u=2480181462,2609747608&fm=253&fmt=auto&app=138&f=JPEG?w=750&h=500";
+      cylinder.position.x = x;
+      cylinder.position.z = z;
     }
 
     const cylMaterial = new BABYLON.StandardMaterial("cylMaterial", this.scene);
-    cylMaterial.diffuseTexture = new BABYLON.Texture(
-      matPath,
-      this.scene
-    );
+    cylMaterial.diffuseTexture = new BABYLON.Texture(matPath, this.scene);
     cylinder.material = cylMaterial;
     cylinder.setParent(this.editBox);
     cylinder.position.y = height / 2 + this.height / 2;
-
 
     let margin = diameter / 4;
     let partHole = BABYLON.MeshBuilder.CreateCylinder(
@@ -1153,7 +1185,7 @@ export class BabylonHandle {
     this.parDepth = diameter / 2;
     this.holeArr.push(partHole, partHole1, partHole2);
     this.part = cylinder;
-    this.partHoleArr = [partHole, partHole1, partHole2]
+    this.partHoleArr = [partHole, partHole1, partHole2];
     this.partDisArr = this.createGrooMeasureLine(
       cylinder,
       this.partWidth,
@@ -1163,14 +1195,14 @@ export class BabylonHandle {
   }
 
   replace() {
-    this.part.dispose()
+    this.part.dispose();
   }
 
   //创建槽标注线
   createGrooMeasureLine(mesh: Mesh, width, depth, disArr) {
-    let height = -mesh.getWorldMatrix().m[13] + 20
-    if(mesh == this.editHoleBox){
-      height = 10
+    let height = -mesh.getWorldMatrix().m[13] + 20;
+    if (mesh == this.editHoleBox) {
+      height = 10;
     }
     if (disArr) {
       for (let i = 0; i < disArr.length - 2; i++) {
@@ -1179,6 +1211,7 @@ export class BabylonHandle {
     }
     //侧面假量尺
     let matX = Math.round(mesh.getWorldMatrix().m[12]);
+
     let xBoxLength = this.width / 2 + matX - width / 2;
     let mesXBox = BABYLON.MeshBuilder.CreateBox(
       "mesXBox",
@@ -1187,7 +1220,11 @@ export class BabylonHandle {
     );
 
     mesXBox.setParent(mesh);
-    mesXBox.position = new BABYLON.Vector3(-xBoxLength / 2 - width / 2, height, 0);
+    mesXBox.position = new BABYLON.Vector3(
+      -xBoxLength / 2 - width / 2,
+      height,
+      0
+    );
 
     let dotX = this.createPun(mesXBox, xBoxLength, 0, 0);
 
@@ -1200,7 +1237,11 @@ export class BabylonHandle {
       depth: yBoxLength,
     });
     mesYBox.setParent(mesh);
-    mesYBox.position = new BABYLON.Vector3(0, height, -yBoxLength / 2 - depth / 2);
+    mesYBox.position = new BABYLON.Vector3(
+      0,
+      height,
+      -yBoxLength / 2 - depth / 2
+    );
     let dotY = this.createPun(mesYBox, 0, 0, yBoxLength);
 
     //创建可输入槽距数据展示
@@ -1226,16 +1267,11 @@ export class BabylonHandle {
     mesxInp.thickness = 0;
     mesxInp.onBlurObservable.add((mesXItem) => {
       let newXLength = Number(mesXItem.text);
-      mesXBox.scaling = new BABYLON.Vector3(
-        newXLength / xBoxLength,
-        1,
-        1
-      );
+      mesXBox.scaling = new BABYLON.Vector3(newXLength / xBoxLength, 1, 1);
       this.editHoleBox.position.x =
         newXLength + this.holeWidth / 2 - Number(this.width) / 2;
       mesXBox.position.x = -(newXLength / 2 + this.holeWidth / 2);
-      mesxInp.text = mesXItem.text
-      
+      mesxInp.text = mesXItem.text;
     });
     rectx.addControl(mesxInp);
 

@@ -17,13 +17,14 @@ export class partBblon {
 
     let part = new partStore(this.partScene);
     let pipe = part.pipePart();
-    pipe.rotation.z = 45
-    this.pipe = pipe
+    pipe.rotation.z = 45;
+    this.pipe = pipe;
   }
 
   camera;
   CreateScene() {
     const partScene = new Scene(this.engine);
+    partScene.clearColor = new BABYLON.Color4(0, 0, 0, 0.1);
     let camera = new BABYLON.ArcRotateCamera(
       "cmera",
       -Math.PI / 2,
@@ -40,13 +41,13 @@ export class partBblon {
     camera.panningSensibility = 5;
 
     camera.useAutoRotationBehavior = true;
-    camera.autoRotationBehavior.idleRotationSpeed += 0.5
+    camera.autoRotationBehavior.idleRotationSpeed += 0.5;
 
     this.camera = camera;
 
     partScene.onPointerObservable.add((info) => {
-        // console.log(info);
-    })
+      // console.log(info);
+    });
 
     //灯光
     new BABYLON.HemisphericLight(
