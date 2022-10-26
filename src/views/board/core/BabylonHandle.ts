@@ -131,21 +131,31 @@ export class BabylonHandle {
     //监听鼠标点击事件
     scene.onPointerObservable.add((pointerInfo) => {
       let pickMesh = pointerInfo.pickInfo.pickedMesh as Mesh;
-
       if (
         pickMesh != null &&
         pointerInfo.type == 64 &&
         pickMesh?.name !== "editBox" &&
         pickMesh?.name !== "box"
       ) {
-        this.hl && this.hl.removeAllMeshes();
-        //选中高光
-        this.hl = new BABYLON.HighlightLayer("hl", scene);
-        this.hl.addMesh(pickMesh, BABYLON.Color3.Green());
-        this.selectMesh[0] = pickMesh;
-        this.selectMesh.splice(1, this.selectMesh.length);
+        // this.hl && this.hl.removeAllMeshes();
+        // //选中高光
+        // this.hl = new BABYLON.HighlightLayer("hl", scene);
+        // this.hl.addMesh(pickMesh, BABYLON.Color3.Green());
+        // this.selectMesh[0] = pickMesh;
+        // this.selectMesh.splice(1, this.selectMesh.length);
+        // console.log(pickMesh);
+        // pickMesh.getChildMeshes().forEach((item) => {
+        //   let child = item.getChildMeshes();
+        //   if (child) {
+        //     child.forEach((item) => {
+        //       item.dispose();
+        //     });
+        //   }
+        //   item.dispose();
+        // });
+        // pickMesh.dispose();
       }
-
+      // return;
       switch (pointerInfo.type) {
         case BABYLON.PointerEventTypes.POINTERDOWN:
           if (

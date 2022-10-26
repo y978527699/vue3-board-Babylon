@@ -5,11 +5,11 @@
     append-to-body
     @close="handleClose"
     width="50%"
-    top="3vh"
+    top="2vh"
     :destroy-on-close="true"
     :show-close="false"
   >
-    <el-backtop :right="310" :bottom="60" target=".detailsBox" />
+    <el-backtop :right="300" :bottom="50" target=".detailsBox" />
     <div class="bannerWrap">
       <!-- <el-row style="height:250px" v-show="isCanShow"> -->
       <el-row style="height: 250px">
@@ -24,18 +24,18 @@
         </el-col>
       </el-row>
       <!-- <el-carousel trigger="click" height="250px" v-show="!isCanShow">
-        <el-carousel-item v-for="item in goodsData?.bannerImgs" :key="item">
-          <img style="width:100%;height: 100%;" :src="item" />
-        </el-carousel-item>
-      </el-carousel> -->
+          <el-carousel-item v-for="item in goodsData?.bannerImgs" :key="item">
+            <img style="width:100%;height: 100%;" :src="item" />
+          </el-carousel-item>
+        </el-carousel> -->
       <div class="goodName">{{ goodsData?.name }}</div>
     </div>
     <div class="core">
       <!-- <button @click="handleCan">11</button> -->
       <!-- <div class="showCan">
-        <el-button @click="handleCan" v-show="!isCanShow" round>3D演示</el-button>
-        <el-button @click="handleCan" v-show="isCanShow">关闭演示</el-button>
-      </div> -->
+          <el-button @click="handleCan" v-show="!isCanShow" round>3D演示</el-button>
+          <el-button @click="handleCan" v-show="isCanShow">关闭演示</el-button>
+        </div> -->
       <div class="container">
         <div>
           <div class="goodInfo">
@@ -123,7 +123,7 @@
         </div>
         <div class="content">
           <div class="details">
-            <video class="video" controls>
+            <video class="video" controls v-if="goodsData?.video">
               <source :src="goodsData?.video" type="video/mp4" />
             </video>
             <el-image
@@ -138,8 +138,13 @@
         </div>
         <div>
           <!-- 地图 -->
-          <!-- <CustomMap :width="598" :height="346" v-model:longitude="longitude"  v-model:latitude="latitude"></CustomMap> -->
-          <Baidu></Baidu>
+          <!-- <CustomMap
+            :width="598"
+            :height="346"
+            :longitude="113.621058"
+            :latitude="22.931429"
+          ></CustomMap> -->
+          <!-- <Baidu></Baidu> -->
         </div>
       </div>
     </div>
@@ -223,7 +228,7 @@ export default defineComponent({
 </script>
 <style>
 .detailsBox {
-  height: 715px !important;
+  height: 95% !important;
   overflow: scroll;
 }
 .detailsBox::-webkit-scrollbar {
@@ -240,6 +245,9 @@ export default defineComponent({
 }
 .detailsBox .el-dialog__header {
   padding: 0;
+}
+.el-backtop__icon {
+  font-size: 30px;
 }
 </style>
 <style scoped>
@@ -374,9 +382,15 @@ export default defineComponent({
   color: white;
   font-size: 25px;
 }
-
 .previewImg img {
   width: 100%;
   height: 100%;
+}
+
+.el-backtop {
+  right: 310px;
+  width: 60px;
+  height: 60px;
+  bottom: 60px;
 }
 </style>

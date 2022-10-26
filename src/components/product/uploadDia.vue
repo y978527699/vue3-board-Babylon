@@ -22,7 +22,7 @@
         <el-form-item label="商品名" prop="name">
           <el-input v-model="uploadForm.name" />
         </el-form-item>
-        <el-form-item label="规格" prop="specs">
+        <el-form-item label="规格" prop="specs" class="specs">
           <el-tag
             v-for="tag in uploadForm.specs"
             :key="tag.sid"
@@ -34,34 +34,52 @@
             {{ tag.sname }}
           </el-tag>
           <el-input
-            v-if="specsInpShow"
             ref="specsRef"
             v-model="specsValue"
-            class="ml-1 w-20"
+            class="ml-1 w-25"
             size="small"
             @keyup.enter="handleSpecsConfirm"
-            @blur="handleSpecsConfirm"
-            placeholder="回车或离焦添加规格"
-          />
-          <el-button
-            v-else
-            class="button-new-tag ml-1"
-            size="small"
-            @click="handleSpecsInp"
+            @blur="specsValue = ''"
+            placeholder="回车添加规格"
           >
-            添加规格
-          </el-button>
+            <template #suffix>
+              <span>{{ uploadForm.specs.length }}/10</span>
+            </template>
+          </el-input>
         </el-form-item>
-        <el-form-item label="展示图片" prop="bannerImgs">
+        <el-form-item label="封面" prop="cover">
+          <el-upload
+            v-model:file-list="uploadForm.cover"
+            list-type="picture-card"
+            :on-preview="handleCoverPreview"
+            :on-remove="coverRemove"
+            :auto-upload="false"
+            :accept="'.jpg,.png'"
+            :class="{ coverHide: hideCoverUpload }"
+            :on-change="handleCoverChange"
+          >
+            <el-icon><Camera /></el-icon>
+            <template #tip>
+              <div class="el-upload__tip text-red">
+                仅可上传一张封面，需要替换请先触摸图片删除
+              </div>
+            </template>
+          </el-upload>
+
+          <el-dialog v-model="coverDiaVisible" class="previewImg">
+            <img w-full :src="coverUrl" alt="封面" />
+          </el-dialog>
+        </el-form-item>
+        <el-form-item label="轮播展示图" prop="bannerImgs">
           <el-upload
             action="#"
             list-type="picture-card"
             :auto-upload="false"
             v-model:file-list="uploadForm.bannerImgs"
             :multiple="true"
-            :accept="'.jpg'"
+            :accept="'.jpg,.png'"
           >
-            <el-icon><Plus /></el-icon>
+            <el-icon><Camera /></el-icon>
 
             <template #file="{ file }">
               <div>
@@ -79,7 +97,7 @@
                   </span>
                   <span
                     class="el-upload-list__item-delete"
-                    @click="handleRemove(file)"
+                    @click="handleRemove(file, uploadFiles)"
                   >
                     <el-icon><Delete /></el-icon>
                   </span>
@@ -101,27 +119,26 @@
             :auto-upload="false"
             :v-model:file-list="uploadForm.video"
             :accept="'.mp4'"
-            :on-success="handleChange"
+            :on-change="handleChange"
           >
             <template #trigger>
               <el-button type="primary">选择视频</el-button>
             </template>
             <template #tip>
               <div class="el-upload__tip text-red">
-                limit 1 file, new file will cover the old file
+                仅可上传一个视频，超出将替换原视频
               </div>
             </template>
           </el-upload>
         </el-form-item>
-        <!-- <el-form-item label="详情图片" prop="introImgs">
+        <el-form-item label="详情图片" prop="introImgs">
           <el-upload
-            action="#"
             list-type="picture-card"
             :auto-upload="false"
             v-model:file-list="uploadForm.introImgs"
             :multiple="true"
           >
-            <el-icon><Plus /></el-icon>
+            <el-icon><Camera /></el-icon>
 
             <template #file="{ file }">
               <div>
@@ -133,13 +150,13 @@
                 <span class="el-upload-list__item-actions">
                   <span
                     class="el-upload-list__item-preview"
-                    @click="handlePictureCardPreview(file)"
+                    @click="handleIntroPreview(file)"
                   >
                     <el-icon><zoom-in /></el-icon>
                   </span>
                   <span
                     class="el-upload-list__item-delete"
-                    @click="handleRemove(file)"
+                    @click="handleIntroRemove(file, uploadFiles)"
                   >
                     <el-icon><Delete /></el-icon>
                   </span>
@@ -148,10 +165,10 @@
             </template>
           </el-upload>
 
-          <el-dialog v-model="imgDiaVisible" class="previewImg">
-            <img w-full :src="dialogImageUrl" alt="Preview Image" />
+          <el-dialog v-model="introVisible" class="previewImg">
+            <img w-full :src="introImageUrl" alt="Preview Image" />
           </el-dialog>
-        </el-form-item> -->
+        </el-form-item>
         <el-form-item label="预览图纸" prop="draw">
           <el-upload
             v-model:file-list="uploadForm.draw"
@@ -159,8 +176,16 @@
             :on-preview="handleDrawPreview"
             :on-remove="DrawRemove"
             :auto-upload="false"
+            :accept="'.jpg,.png'"
+            :class="{ hide: hideDrawUpload }"
+            :on-change="handleDrawChange"
           >
-            <el-icon><Plus /></el-icon>
+            <el-icon><Camera /></el-icon>
+            <template #tip>
+              <div class="el-upload__tip text-red">
+                仅可上传一张预览图纸，需要替换请先触摸图片删除
+              </div>
+            </template>
           </el-upload>
 
           <el-dialog v-model="DrawDiaVisible" class="previewImg">
@@ -196,12 +221,12 @@ import {
   UploadRawFile,
 } from "element-plus";
 import { defineComponent, nextTick, reactive, ref, onMounted } from "vue";
-import type { UploadProps, UploadUserFile } from "element-plus";
-import { Plus, Delete, ZoomIn } from "@element-plus/icons-vue";
+import type { UploadProps } from "element-plus";
+import { Plus, Delete, ZoomIn, Camera } from "@element-plus/icons-vue";
 import { goods, productsList } from "./publicData";
 
 export default defineComponent({
-  components: { Plus, Delete, ZoomIn },
+  components: { Plus, Delete, ZoomIn, Camera },
   props: ["pId"],
   setup(props, context) {
     let dialogVisible = true;
@@ -219,33 +244,74 @@ export default defineComponent({
       await formEl.validate((valid, fields) => {
         if (valid) {
           console.log("submit!");
-          uploadForm.id = "103";
+          let id = Math.floor(Math.random() * 1000).toString();
 
           let productData = JSON.parse(localStorage.getItem("productsList"))
             ? JSON.parse(localStorage.getItem("productsList"))
             : productsList;
+
           productData.forEach((item) => {
             if (item.pId == props.pId) {
               item.content.push({
-                id: uploadForm.id,
+                id,
                 name: uploadForm.name,
-                src: uploadForm.bannerImgs[0].url,
+                src: require("@/static/images/partImg/" +
+                  uploadForm.cover[0].name),
                 introduce: uploadForm.introduce,
               });
             }
           });
+
           localStorage.setItem("productsList", JSON.stringify(productData));
 
-          uploadForm.bannerImgs = uploadForm.bannerImgs.map((item) => {
-            return item.url;
+          let bannerImgs = uploadForm.bannerImgs.map((item, index) => {
+            return require("@/static/images/partImg/" + item.name);
           });
-          uploadForm.introImgs = uploadForm.bannerImgs;
-          goods.push(uploadForm);
+          let introImgs = [];
+          if (uploadForm.introImgs.length != 0) {
+            introImgs = uploadForm.introImgs.map((item, index) => {
+              return require("@/static/images/partImg/" + item.name);
+            });
+          }
+          let draw = "";
+          if (uploadForm.draw.length != 0) {
+            draw = require("@/static/images/partImg/" +
+              uploadForm.draw[0].name);
+          }
+          let setList = {
+            id,
+            name: uploadForm.name,
+            introduce: uploadForm.introduce,
+            bannerImgs,
+            specs: uploadForm.specs,
+            introImgs,
+            video: uploadForm.video,
+            draw,
+            evaluate: uploadForm.evaluate,
+            cover: require("@/static/images/partImg/" +
+              uploadForm.cover[0].name),
+          };
+
+          // uploadForm.bannerImgs = uploadForm.bannerImgs.map((item, index) => {
+          //   return require("@/static/images/partImg/" + item.name);
+          // });
+
+          // if (uploadForm.introImgs) {
+          //   uploadForm.introImgs = uploadForm.introImgs.map((item, index) => {
+          //     return require("@/static/images/partImg/" + item.name);
+          //   });
+          // }
+          // if (uploadForm.draw) {
+          //   uploadForm.draw = require("@/static/images/partImg/" +
+          //     uploadForm.draw[0].name);
+          // }
+
+          goods.push(setList);
 
           localStorage.setItem("goodsInfo", JSON.stringify(goods));
           closeDia();
           ElMessage({
-            message: "Congrats, this is a success message.",
+            message: "上传成功",
             type: "success",
           });
         } else {
@@ -265,7 +331,7 @@ export default defineComponent({
       specs: [],
       introImgs: [],
       video: "",
-      draw: "",
+      draw: [],
       evaluate: [
         {
           uid: 0,
@@ -297,6 +363,7 @@ export default defineComponent({
             "我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军我不是水军",
         },
       ],
+      cover: [],
     });
     const rules = reactive<FormRules>({
       name: [
@@ -305,7 +372,7 @@ export default defineComponent({
           message: "商品名不能为空",
           trigger: "blur",
         },
-        // { min: 3, max: 5, message: "字符长度", trigger: "blur" },
+        { min: 1, max: 10, message: "名字数量在1~10之间", trigger: "blur" },
       ],
       specs: [
         {
@@ -317,11 +384,28 @@ export default defineComponent({
       bannerImgs: [
         {
           required: true,
-          message: "展示图片不能为空",
+          message: "轮播展示图不能为空",
           trigger: "blur",
         },
       ],
+      cover: [
+        {
+          required: true,
+          message: "封面图片不能为空",
+        },
+      ],
     });
+
+    //banner图片
+    const dialogImageUrl = ref("");
+    const imgDiaVisible = ref(false);
+    const handleRemove: UploadProps["onRemove"] = (uploadFile, uploadFiles) => {
+      uploadFiles.splice(uploadFiles.indexOf(uploadFile), 1);
+    };
+    const handlePictureCardPreview: UploadProps["onPreview"] = (uploadFile) => {
+      dialogImageUrl.value = uploadFile.url!;
+      imgDiaVisible.value = true;
+    };
 
     //规格方法
     let sid = ref(0);
@@ -329,10 +413,31 @@ export default defineComponent({
     let specsValue = ref<string>("");
     const specsRef = ref<InstanceType<typeof ElInput>>();
     let handleSpecsConfirm = () => {
+      let isSpecs = uploadForm.specs.find((item) => {
+        if (item.sname == specsValue.value) {
+          return true;
+        }
+      });
+      if (isSpecs) {
+        specsValue.value = "";
+        ElMessage({
+          message: "规格重复!",
+          type: "warning",
+        });
+        return;
+      }
+      if (uploadForm.specs.length > 9) {
+        specsValue.value = "";
+        ElMessage({
+          message: "不可超过10个规格!",
+          type: "error",
+        });
+        return;
+      }
       if (specsValue.value) {
         uploadForm.specs.push({ sid: sid.value++, sname: specsValue.value });
       }
-      specsInpShow.value = false;
+      console.log(specsValue.value, uploadForm.specs);
       specsValue.value = "";
     };
     const specsClose = (value) => {
@@ -345,40 +450,66 @@ export default defineComponent({
       });
     };
 
-    //banner图片
-    const dialogImageUrl = ref("");
-    const imgDiaVisible = ref(false);
-    const handleRemove: UploadProps["onRemove"] = (uploadFile) => {
-      console.log(uploadFile);
+    //封面
+    // let cover = ref();
+    let hideCoverUpload = ref(false);
+    let coverDiaVisible = ref(false);
+    const coverUrl = ref("");
+    let handleCoverPreview: UploadProps["onPreview"] = (uploadFile) => {
+      coverUrl.value = uploadFile.url!;
+      coverDiaVisible.value = true;
     };
-    const handlePictureCardPreview: UploadProps["onPreview"] = (uploadFile) => {
-      dialogImageUrl.value = uploadFile.url!;
-      imgDiaVisible.value = true;
+    let coverRemove: UploadProps["onRemove"] = (uploadFile, uploadFiles) => {
+      uploadFiles.splice(0, 1);
+      hideCoverUpload.value = false;
+    };
+    let handleCoverChange = (uploadFile, uploadFiles) => {
+      hideCoverUpload.value = uploadFiles.length >= 1;
+      uploadForm.cover = uploadFile;
     };
 
     //上传视频
     const upVideo = ref<UploadInstance>();
     const handleExceed: UploadProps["onExceed"] = (files) => {
       console.log(files);
-
       upVideo.value!.clearFiles();
       const file = files[0] as UploadRawFile;
       file.uid = genFileId();
       upVideo.value!.handleStart(file);
       console.log(upVideo.value);
     };
-    const handleChange = (uploadFile, uploadFiles) => {
-      console.log(uploadFile, uploadFiles, "uploadFile, uploadFiles");
+    let handleChange = (file, fileLists) => {
+      uploadForm.video = require("@/static/images/partImg/" + file.name);
     };
+
+    //详情图片
+    const introImageUrl = ref("");
+    const introVisible = ref(false);
+    const handleIntroRemove: UploadProps["onRemove"] = (
+      uploadFile,
+      uploadFiles
+    ) => {
+      uploadForm.introImgs.splice(uploadForm.introImgs.indexOf(uploadFile), 1);
+    };
+    const handleIntroPreview: UploadProps["onPreview"] = (uploadFile) => {
+      introImageUrl.value = uploadFile.url!;
+      introVisible.value = true;
+    };
+
     //预览图纸
+    let hideDrawUpload = ref(false);
     let DrawDiaVisible = ref(false);
     const DrawUrl = ref("");
     let handleDrawPreview: UploadProps["onPreview"] = (uploadFile) => {
       DrawUrl.value = uploadFile.url!;
-      DrawDiaVisible.value = true;
+      DrawDiaVisible.value = !DrawDiaVisible.value;
     };
-    let DrawRemove: UploadProps["onRemove"] = (uploadFile) => {
-      console.log(uploadFile);
+    let DrawRemove: UploadProps["onRemove"] = (uploadFile, uploadFiles) => {
+      uploadFiles.splice(0, 1);
+      hideDrawUpload.value = false;
+    };
+    let handleDrawChange = (uploadFile, uploadFiles) => {
+      hideDrawUpload.value = uploadFiles.length >= 1;
     };
 
     //富文本
@@ -410,6 +541,18 @@ export default defineComponent({
       DrawDiaVisible,
       DrawUrl,
       DrawRemove,
+      hideDrawUpload,
+      handleDrawChange,
+      hideCoverUpload,
+      coverDiaVisible,
+      handleCoverPreview,
+      coverRemove,
+      handleCoverChange,
+      handleIntroPreview,
+      handleIntroRemove,
+      introVisible,
+      introImageUrl,
+      coverUrl,
     };
   },
 });
@@ -455,6 +598,24 @@ export default defineComponent({
 .uploadDialog::-webkit-scrollbar-thumb {
   background-color: #c1c1c1;
   border-radius: 6px;
+}
+
+.specs .el-input-group__append {
+  box-shadow: none;
+  background-color: white;
+  padding: 0 5px;
+}
+
+.el-upload--picture-card i {
+  font-size: 20px;
+}
+
+.hide .el-upload--picture-card {
+  display: none;
+}
+
+.coverHide .el-upload--picture-card {
+  display: none;
 }
 </style>
 <style scoped>

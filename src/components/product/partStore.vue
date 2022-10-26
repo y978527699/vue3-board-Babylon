@@ -1,137 +1,143 @@
 <template>
-  <el-button text @click="outerVisible = true" v-show="false"
-    >open the outer Dialog</el-button
-  >
-  <el-dialog
-    v-model="outerVisible"
-    id="partStore"
-    width="80%"
-    top="3vh"
-    @close="handleClose"
-    :close-on-press-escape="false"
-    class="partSDia"
-  >
-    <template #title>
-      <div class="mt-4 searchBox">
-        <el-image
-          class="dialogImg"
-          style="width: 35px; height: 35px"
-          :src="logoUrl"
-        />
-
-        <el-input
-          v-model="searchVal"
-          placeholder="请输入配件"
-          class="input-with-select"
-        >
-          <template #prefix>
-            <el-icon><Search /></el-icon>
-          </template>
-          <template #prepend> 有屋配件库 </template>
-        </el-input>
-      </div>
-    </template>
-
-    <template #default>
-      <!-- <el-row class="recWrap">
-        <el-col
-          :span="24 / lineImgs.length"
-          v-for="(item, index) in lineImgs"
-          :key="index"
-        >
+  <div class="partStoreWrap">
+    <el-button text @click="outerVisible = true" v-show="false"
+      >open the outer Dialog</el-button
+    >
+    <el-dialog
+      v-model="outerVisible"
+      id="partStore"
+      width="80%"
+      top="1vh"
+      @close="handleClose"
+      :close-on-press-escape="false"
+      class="partSDia"
+    >
+      <!-- 搜索框 -->
+      <template #title>
+        <div class="mt-4 searchBox">
           <el-image
-            class="lineImg"
-            :src="item.img"
-            @click="openDetails(item.id)"
+            class="dialogImg"
+            style="width: 35px; height: 35px"
+            :src="logoUrl"
           />
-        </el-col>
-      </el-row> -->
 
-      <el-carousel
-        :interval="4000"
-        type="card"
-        height="200px"
-        indicator-position="none"
-      >
-        <el-carousel-item v-for="item in lineImgs" :key="item">
-          <el-image
-            class="lineImg"
-            :src="item.img"
-            @click="openDetails(item.id)"
-          />
-        </el-carousel-item>
-      </el-carousel>
+          <el-input
+            v-model="searchVal"
+            placeholder="请输入配件"
+            class="input-with-select"
+          >
+            <template #prefix>
+              <el-icon><Search /></el-icon>
+            </template>
+            <template #prepend> 有屋配件库 </template>
+          </el-input>
+        </div>
+      </template>
 
-      <el-row>
-        <el-col :span="6">
-          <el-cascader-panel
-            ref="menuList"
-            :options="menuList"
-            @change="changeHandle"
-            model-value="0010101"
-            class="mt5"
-          />
-        </el-col>
+      <template #default>
+        <!-- 添加商品按钮 -->
+        <el-button type="primary" circle class="addBtn" @click="uploadHandle">
+          <el-icon><Plus /></el-icon>
+        </el-button>
 
-        <el-col :span="18">
-          <ul class="ulBox mt5" v-if="list.length > 0">
-            <li
-              class="liSty"
-              v-for="item in list"
-              :key="item.id"
+        <!-- 轮播图 -->
+        <el-carousel
+          :interval="4000"
+          type="card"
+          height="200px"
+          indicator-position="none"
+          class="bannerCar"
+          @change="handleBannerChange"
+        >
+          <el-carousel-item v-for="(item, indx) in lineImgs" :key="indx">
+            <el-image
+              class="lineImg"
+              :src="item.img"
               @click="openDetails(item.id)"
-            >
-              <el-image
-                style="height: 120px"
-                :src="item.src"
-                fit="scale-down"
-              />
+            />
+            <div class="bannerName" v-if="bannerInd == indx">
+              {{ item.name }}
+            </div>
+          </el-carousel-item>
+        </el-carousel>
 
-              <div class="nameSty">{{ item.name }}</div>
+        <el-divider border-style="double" class="hrSty" />
+        <el-row>
+          <!-- 商品分类 -->
+          <el-col :span="6">
+            <el-cascader-panel
+              ref="menuList"
+              :options="menuList"
+              @change="changeHandle"
+              model-value="0010101"
+              class="mt5"
+            />
+          </el-col>
 
-              <el-popover
-                v-if="item.introduce.length > 30"
-                placement="top-start"
-                :width="200"
-                trigger="hover"
-                :content="item.introduce"
+          <!-- 对应商品 -->
+          <el-col :span="18">
+            <ul class="ulBox mt5" v-if="list.length > 0">
+              <!-- <li class="liSty" @click="uploadHandle">
+                <el-icon><Plus /></el-icon>
+              </li> -->
+              <li
+                class="liSty"
+                v-for="item in list"
+                :key="item.id"
+                @click="openDetails(item.id)"
               >
-                <template #reference>
-                  <span class="hiddenText">{{ ellipsis(item.introduce) }}</span>
-                </template>
-              </el-popover>
+                <el-image
+                  style="height: 120px"
+                  :src="item.src"
+                  fit="scale-down"
+                />
 
-              <span class="hiddenText" v-else>{{ item.introduce }}</span>
-            </li>
+                <div class="nameSty">{{ item.name }}</div>
 
-            <li class="liSty" @click="uploadHandle">
-              <el-icon><Plus /></el-icon>
-            </li>
-          </ul>
+                <el-popover
+                  v-if="item.introduce.length > 30"
+                  placement="top-start"
+                  :width="200"
+                  trigger="hover"
+                  :content="item.introduce"
+                >
+                  <template #reference>
+                    <span class="hiddenText">{{
+                      ellipsis(item.introduce)
+                    }}</span>
+                  </template>
+                </el-popover>
 
-          <el-empty v-else description="暂无数据" :image-size="200" />
-        </el-col>
-      </el-row>
+                <span class="hiddenText" v-else>{{ item.introduce }}</span>
+              </li>
+              <!-- <el-button type="primary" circle class="addBtn">
+                <el-icon><Plus /></el-icon>
+              </el-button> -->
+            </ul>
 
-      <ShowDialog
-        v-if="innerVisible"
-        :currentId="currentId"
-        @changeInnerVisible="changeInnerVisible"
-      ></ShowDialog>
+            <el-empty v-else description="暂无数据" :image-size="200" />
+          </el-col>
+        </el-row>
 
-      <!-- 上传 -->
+        <ShowDialog
+          v-if="innerVisible"
+          :currentId="currentId"
+          @changeInnerVisible="changeInnerVisible"
+        ></ShowDialog>
 
-      <UploadDia
-        v-if="uploadShow"
-        @changeDiaVisible="uploadHandle"
-        :pId="pId"
-      ></UploadDia>
-    </template>
-  </el-dialog>
+        <!-- 上传 -->
+        <UploadDia
+          v-if="uploadShow"
+          @changeDiaVisible="uploadHandle"
+          :pId="pId"
+        ></UploadDia>
+      </template>
+    </el-dialog>
+  </div>
 </template>
 
 <script lang="ts">
-import { getCurrentInstance, onMounted, ref } from "vue";
+import { getCurrentInstance, onMounted, reactive, ref } from "vue";
 import ShowDialog from "./showDialog.vue";
 import UploadDia from "./uploadDia.vue";
 import { menuList, productsList, lineImgs } from "./publicData";
@@ -173,12 +179,11 @@ export default {
       list.value = filterList[0] ? filterList[0].content : [];
       console.log(list.value, "获取对应产品列表");
     };
-    const changeHandle = () => {
-      let nodesInfo = proxy.$refs["menuList"].getCheckedNodes()[0];
-      pId.value = nodesInfo.data.value;
-      console.log(nodesInfo.data, "节点发生改变触发");
-      let { value } = nodesInfo.data;
-      let filterList = productsList.filter((item) => item.pId == value);
+    const changeHandle = (val) => {
+      let dataList = JSON.parse(localStorage.getItem("productsList"));
+      console.log(val[2]);
+      pId.value = val[2];
+      let filterList = dataList.filter((item) => item.pId == pId.value);
       list.value = filterList[0] ? filterList[0].content : [];
       console.log(list.value, "获取对应产品列表");
     };
@@ -186,14 +191,19 @@ export default {
       bus.emit("closePart", !outerVisible.value);
     };
 
+    //获取当前轮播索引
+    let bannerInd = ref(0);
+    const handleBannerChange = (ind) => {
+      bannerInd.value = ind;
+    };
+
     onMounted(() => {
       pId.value = "0010101";
-      // let filterList = productsList.filter((item) => item.pId == pId.value);
-      // list.value = filterList[0] ? filterList[0].content : [];
-      // console.log(list.value, "获取对应产品列表");
       let dataList = JSON.parse(localStorage.getItem("productsList"))
         ? JSON.parse(localStorage.getItem("productsList"))
         : productsList;
+      console.log(dataList, "获取全部产品列表");
+
       let filterList = dataList.filter((item) => item.pId == pId.value);
       list.value = filterList[0] ? filterList[0].content : [];
       console.log(list.value, "获取对应产品列表");
@@ -221,6 +231,8 @@ export default {
       currentId,
       changeInnerVisible,
       pId,
+      handleBannerChange,
+      bannerInd,
     };
   },
   components: { ShowDialog, UploadDia, Plus, Search },
@@ -232,8 +244,10 @@ export default {
   position: unset;
 }
 .partSDia {
-  height: 90%;
+  height: 97%;
   overflow: hidden;
+  position: relative;
+  border-radius: 15px;
 }
 
 .el-cascader-panel.is-bordered {
@@ -291,15 +305,24 @@ export default {
   line-height: 5px;
 }
 
-.recWrap .el-col {
-  height: 150px;
-  padding: 10px 10px;
-}
-
 .ulBox {
   margin-top: 5px;
   height: 420px;
   overflow-y: scroll;
+}
+
+.partSDia .addBtn {
+  font-size: 25px !important;
+  z-index: 1;
+}
+
+.partSDia .addBtn {
+  width: 60px;
+  height: 60px;
+  position: absolute;
+  right: 25px;
+  bottom: 25px;
+  border-radius: 60px !important;
 }
 
 .ulBox::-webkit-scrollbar {
@@ -356,10 +379,7 @@ export default {
   border: 1px solid;
   border-color: rgba(0, 0, 0, 0);
   cursor: pointer;
-}
-
-.lineImg:hover {
-  border: 1px solid #409eff;
+  position: relative;
 }
 
 li .el-icon-plus {
@@ -391,5 +411,35 @@ li .el-icon-plus {
 .partStore .el-carousel__item:nth-child(2n + 1) {
   background-color: #d3dce6;
 }
-</style>
 
+.bannerCar {
+  margin: 0 5px;
+}
+
+.bannerCar .el-image__inner {
+  border-radius: 15px;
+}
+
+.bannerName {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.3);
+  width: 100%;
+  height: 40px;
+  font-size: 18px;
+  text-align: center;
+  bottom: 0;
+  border-bottom-left-radius: 15px;
+  line-height: 40px;
+  color: white;
+  border-bottom-right-radius: 15px;
+}
+
+.hrSty {
+  margin-bottom: 5px;
+  margin-top: 10px;
+}
+
+.partStoreWrap .el-overlay-dialog {
+  overflow: hidden;
+}
+</style>
