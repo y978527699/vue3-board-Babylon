@@ -138,12 +138,12 @@
         </div>
         <div>
           <!-- 地图 -->
-          <!-- <CustomMap
+          <CustomMap
             :width="598"
             :height="346"
             :longitude="113.621058"
             :latitude="22.931429"
-          ></CustomMap> -->
+          ></CustomMap>
           <!-- <Baidu></Baidu> -->
         </div>
       </div>
@@ -230,6 +230,8 @@ export default defineComponent({
 .detailsBox {
   height: 95% !important;
   overflow: scroll;
+  overflow-x: hidden;
+  border-radius: 20px;
 }
 .detailsBox::-webkit-scrollbar {
   width: 6px;

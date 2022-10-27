@@ -137,12 +137,12 @@ export class BabylonHandle {
         pickMesh?.name !== "editBox" &&
         pickMesh?.name !== "box"
       ) {
-        // this.hl && this.hl.removeAllMeshes();
-        // //选中高光
-        // this.hl = new BABYLON.HighlightLayer("hl", scene);
-        // this.hl.addMesh(pickMesh, BABYLON.Color3.Green());
-        // this.selectMesh[0] = pickMesh;
-        // this.selectMesh.splice(1, this.selectMesh.length);
+        this.hl && this.hl.removeAllMeshes();
+        //选中高光
+        this.hl = new BABYLON.HighlightLayer("hl", scene);
+        this.hl.addMesh(pickMesh, BABYLON.Color3.Green());
+        this.selectMesh[0] = pickMesh;
+        this.selectMesh.splice(1, this.selectMesh.length);
         // console.log(pickMesh);
         // pickMesh.getChildMeshes().forEach((item) => {
         //   let child = item.getChildMeshes();
@@ -291,10 +291,10 @@ export class BabylonHandle {
     this.box.setEnabled(false);
 
     //创建槽BOX
-    this.createHole(400, 400, 18, "矩形");
+    // this.createHole(400, 400, 18, "矩形");
 
     //创建可输入面板
-    this.createHoleGUI(this.editHoleBox);
+    // this.createHoleGUI(this.editHoleBox);
 
     //创建标注系统
     // this.createGrooMeasureLine(this.editHoleBox,this.holeWidth,this.holeDepth);
@@ -896,17 +896,6 @@ export class BabylonHandle {
       boxCSG = boxCSG.subtract(holeCSG);
     }
     this.box = boxCSG.toMesh("csgBox", this.boxMaterial, this.scene);
-    BABYLON.Tools.CreateScreenshotUsingRenderTarget(
-      this.engine,
-      this.camera,
-      800,
-      function(data) {
-        console.log(data);
-      }
-    );
-
-    // let boxHL = new BABYLON.HighlightLayer("boxHL", this.scene);
-    // boxHL.addMesh(this.box, BABYLON.Color3.Red());
 
     this.clearMes();
   }
@@ -1318,6 +1307,15 @@ export class BabylonHandle {
     let retDisArr = [mesXBox, mesYBox, mesAdvancedTexture, dotX, dotY];
 
     return retDisArr;
+  }
+
+  //蒸烤箱
+  createbbqBox(width: number, height: number, depth: number) {
+    let bbqBox = BABYLON.MeshBuilder.CreateBox(
+      "bbqBox",
+      { width, height, depth },
+      this.scene
+    );
   }
 }
 

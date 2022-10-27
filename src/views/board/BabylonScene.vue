@@ -23,13 +23,13 @@ export default defineComponent({
             {
               label: "矩形",
               click: (e) => {
-                bbScene.createHole(400, 400, 18, "矩形");
+                isEdit() && bbScene.createHole(400, 400, 18, "矩形");
               },
             },
             {
               label: "圆形",
               click: (e) => {
-                bbScene.createHole(400, 400, 18, "圆形");
+                isEdit() && bbScene.createHole(400, 400, 18, "圆形");
               },
             },
           ],
@@ -43,37 +43,37 @@ export default defineComponent({
                 {
                   label: "左斜面",
                   click: () => {
-                    bbScene.createIncPlane("left", "normal");
+                    isEdit() && bbScene.createIncPlane("left", "normal");
                   },
                 },
                 {
                   label: "左斜面梯形",
                   click: () => {
-                    bbScene.createIncPlane("left", "trape");
+                    isEdit() && bbScene.createIncPlane("left", "trape");
                   },
                 },
                 {
                   label: "左斜面长形",
                   click: () => {
-                    bbScene.createIncPlane("left", "long");
+                    isEdit() && bbScene.createIncPlane("left", "long");
                   },
                 },
                 {
                   label: "右斜面",
                   click: () => {
-                    bbScene.createIncPlane("right", "normal");
+                    isEdit() && bbScene.createIncPlane("right", "normal");
                   },
                 },
                 {
                   label: "右斜面梯形",
                   click: () => {
-                    bbScene.createIncPlane("right", "trape");
+                    isEdit() && bbScene.createIncPlane("right", "trape");
                   },
                 },
                 {
                   label: "右斜面长形",
                   click: () => {
-                    bbScene.createIncPlane("right", "long");
+                    isEdit() && bbScene.createIncPlane("right", "long");
                   },
                 },
               ],
@@ -84,7 +84,7 @@ export default defineComponent({
                 {
                   label: "前内槽",
                   click: () => {
-                    bbScene.createInsideHole();
+                    isEdit() && bbScene.createInsideHole();
                   },
                 },
               ],
@@ -94,27 +94,31 @@ export default defineComponent({
         {
           label: "开圆角",
           click: () => {
-            bbScene.createFillet();
+            isEdit() && bbScene.createFillet();
           },
         },
         {
           label: "编辑参数",
           click: () => {
-            panelShow.value = !panelShow.value;
-            bus.emit("plane", panelShow.value);
+            if (isEdit()) {
+              panelShow.value = !panelShow.value;
+              bus.emit("plane", panelShow.value);
+            }
           },
         },
         {
           label: "添加配件",
           click: () => {
-            partShow.value = !partShow.value;
-            bus.emit("part", partShow.value);
+            if (isEdit()) {
+              partShow.value = !partShow.value;
+              bus.emit("part", partShow.value);
+            }
           },
         },
         {
           label: "替换配件",
           click: () => {
-            replacePart();
+            isEdit() && replacePart();
           },
         },
       ],
@@ -126,16 +130,16 @@ export default defineComponent({
     let patterm = ref<string>("");
     let canSave = ref<boolean>(false);
     let bbScene;
-    let replaceShow = ref(true)
+    let replaceShow = ref(true);
     let replacePart = () => {
       if (bbScene.selectMesh.length == 0) {
         ElMessage({
           message: "未选择被替换配件，请双击选择需替换配件！",
           type: "warning",
         });
-        return
+        return;
       }
-      bus.emit('replaceShow',replaceShow.value)
+      bus.emit("replaceShow", replaceShow.value);
     };
     onMounted(() => {
       const canvas = document.getElementById("canvas1") as HTMLCanvasElement;
@@ -161,12 +165,16 @@ export default defineComponent({
       });
 
       bus.on("applyPart", (value) => {
-        bbScene.createPipe();
+        if (value == "102") {
+          bbScene.createPipe();
+        } else {
+          bbScene.createbbqBox(560, 450, 550);
+        }
       });
 
-      bus.on('replacePart',(value) => {
-        bbScene.createPipe()
-      })
+      bus.on("replacePart", (value) => {
+        bbScene.createPipe();
+      });
     });
 
     //获取长、宽、高
@@ -175,6 +183,8 @@ export default defineComponent({
       let box = bbScene.createInitialBox(width, height, depth);
       isCreate.value = true;
     }
+
+    let entityPar = ref(false);
 
     // function changeBSize() {
     //   let { width, height, depth, material, hole } = formData as any;
@@ -225,8 +235,22 @@ export default defineComponent({
       bbScene.changeView({ alpha, beta });
     }
 
+    const isEdit = () => {
+      if (entityPar.value == false) {
+        ElMessage({
+          message: "当前为实体模式，请先进入编辑模式",
+          type: "warning",
+        });
+        return false;
+      }
+      return true;
+    };
+
     function changePat(val) {
-      val == "编辑模式" && bbScene.editPatterm();
+      if (val == "编辑模式") {
+        bbScene.editPatterm();
+        entityPar.value = true;
+      }
       if (val == "实体模式") {
         ElMessageBox.confirm("是否切换为实体模式？", "提示", {
           confirmButtonText: "确认",
@@ -241,13 +265,14 @@ export default defineComponent({
             canSave.value = !canSave.value;
             setTimeout(() => {
               bbScene.createCSG();
-            },0)
+            }, 0);
           })
           .catch(() => {
             ElMessage({
               type: "info",
               message: "取消切换",
             });
+            patterm.value = "编辑模式";
           });
       }
     }
@@ -262,31 +287,57 @@ export default defineComponent({
       isCreate,
       patterm,
       menus,
+      entityPar,
+      isEdit,
     };
   },
 });
 </script>
 
 <template>
-  <el-radio-group v-model="patterm" class="radioBox" @change="changePat" v-if="isCreate">
+  <!-- <el-radio-group
+    v-model="patterm"
+    class="radioBox"
+    @change="changePat"
+    v-if="isCreate"
+  >
     <el-row class="w100">
-      <el-col :span="12"> <el-radio-button label="编辑模式"/></el-col>
-      <el-col :span="12"><el-radio-button label="实体模式"/></el-col>
+      <el-col :span="12"> <el-radio-button label="编辑模式" /></el-col>
+      <el-col :span="12"
+        ><el-radio-button label="实体模式" v-if="entityPar"
+      /></el-col>
     </el-row>
+  </el-radio-group> -->
+  <el-radio-group
+    v-model="patterm"
+    class="radioBox"
+    @change="changePat"
+    v-if="isCreate"
+  >
+    <el-radio-button label="编辑模式" />
+    <el-radio-button label="实体模式" v-if="entityPar" />
   </el-radio-group>
   <canvas id="canvas1" ref="bjsCanvas" v-menus:right="menus"></canvas>
 </template>
 
 <style>
-.el-radio-group {
+/* .el-radio-group {
   position: absolute;
   top: -45px;
   right: 45%;
   z-index: 9999;
-}
-.el-radio-button__inner {
+} */
+/* .el-radio-button__inner {
   margin-right: 15px;
+} */
+
+.radioBox {
+  /* width: 50px; */
+  position: absolute;
+  z-index: 1;
+  margin: 10px 20px;
 }
+
 canvas {
   width: 100%;
   height: calc(100vh - 54px);

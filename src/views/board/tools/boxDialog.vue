@@ -1,6 +1,6 @@
 <template>
-  <div class="wrap">
-    <div class="buildWrap" v-if="isBuild">
+  <div class="createBoard" v-if="isBuild">
+    <div class="buildWrap">
       <el-card class="box-card">
         <template #header>
           <div class="card-header">
@@ -37,31 +37,33 @@ import bus from "../utils/bus";
 export default defineComponent({
   components: {
     BabylonScene,
-},
+  },
   setup() {
     let isBuild = ref<boolean>(true);
     const formData = reactive({
-      height:18,
-      width:1200,
-      depth:800
+      height: 18,
+      width: 1200,
+      depth: 800,
     });
 
-  function buildBox(val){
-    bus.emit('boxSize',val)
-    isBuild.value = false
-  }
+    function buildBox(val) {
+      bus.emit("boxSize", val);
+      isBuild.value = false;
+    }
 
     return {
       isBuild,
       formData,
-      buildBox
+      buildBox,
     };
   },
 });
 </script>
 <style>
-.wrap {
-  position: relative;
+.createBoard {
+  position: absolute;
+  width: 100%;
+  height: 100%;
 }
 
 .el-button {
@@ -74,12 +76,17 @@ export default defineComponent({
   width: 50% !important;
 }
 
+.BoxDialog {
+  top: 0 !important;
+  left: 0 !important;
+}
+
 .buildWrap {
   width: 360px;
   position: absolute;
   top: 50%;
-  left: 50%; 
-   margin: -180px 0 0 -180px;
+  left: 50%;
+  margin: -180px 0 0 -180px;
 }
 
 .btnWrap {

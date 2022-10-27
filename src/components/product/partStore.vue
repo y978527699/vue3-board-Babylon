@@ -125,12 +125,11 @@
           @changeInnerVisible="changeInnerVisible"
         ></ShowDialog>
 
-        <!-- 上传 -->
-        <UploadDia
+        <upload-view
           v-if="uploadShow"
           @changeDiaVisible="uploadHandle"
           :pId="pId"
-        ></UploadDia>
+        ></upload-view>
       </template>
     </el-dialog>
   </div>
@@ -139,11 +138,11 @@
 <script lang="ts">
 import { getCurrentInstance, onMounted, reactive, ref } from "vue";
 import ShowDialog from "./showDialog.vue";
-import UploadDia from "./uploadDia.vue";
 import { menuList, productsList, lineImgs } from "./publicData";
 import bus from "@/views/board/utils/bus";
 import { Plus, Search } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
+import UploadView from "./uploadView.vue";
 
 export default {
   setup() {
@@ -235,7 +234,7 @@ export default {
       bannerInd,
     };
   },
-  components: { ShowDialog, UploadDia, Plus, Search },
+  components: { ShowDialog, Plus, Search, UploadView },
 };
 </script>
 
@@ -425,7 +424,7 @@ li .el-icon-plus {
   background-color: rgba(0, 0, 0, 0.3);
   width: 100%;
   height: 40px;
-  font-size: 18px;
+  font-size: 22px;
   text-align: center;
   bottom: 0;
   border-bottom-left-radius: 15px;
