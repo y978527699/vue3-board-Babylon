@@ -23,7 +23,7 @@ export default class cabBblon {
     });
   }
 
-  selectBoard: Mesh;
+  selectBoard;
   CreateScene() {
     const scene = new Scene(this.engine);
 
@@ -43,10 +43,10 @@ export default class cabBblon {
         : null;
       if (pointerInfo.type == 64) {
         hiLight.removeAllMeshes();
-        // pointerInfo.pickInfo.pickedMesh.material.alpha = 0.5;
+        pointerInfo.pickInfo.pickedMesh.material.alpha = 0.5;
         hiLight.addMesh(pickMesh as Mesh, new BABYLON.Color3(0, 255, 0));
 
-        this.createCabGUI(pickMesh);
+        // this.createCabGUI(pickMesh);
       }
 
       if (pointerInfo.type == 1) {

@@ -14,7 +14,19 @@
       <!-- <el-row style="height:250px" v-show="isCanShow"> -->
       <el-row style="height: 250px">
         <el-col :span="12"
-          ><el-carousel trigger="click" height="250px">
+          ><el-carousel trigger="click" height="250px" :autoplay="false">
+            <el-carousel-item>
+              <video
+                class="video"
+                v-if="goodsData?.video"
+                controls
+                autoplay
+                muted
+                loop
+              >
+                <source :src="goodsData?.video" type="video/mp4" />
+              </video>
+            </el-carousel-item>
             <el-carousel-item v-for="item in goodsData?.bannerImgs" :key="item">
               <img style="width: 100%; height: 100%" :src="item" />
             </el-carousel-item> </el-carousel
@@ -23,30 +35,19 @@
           <canvas id="partCanvas" style="height: 100%"></canvas>
         </el-col>
       </el-row>
-      <!-- <el-carousel trigger="click" height="250px" v-show="!isCanShow">
-          <el-carousel-item v-for="item in goodsData?.bannerImgs" :key="item">
-            <img style="width:100%;height: 100%;" :src="item" />
-          </el-carousel-item>
-        </el-carousel> -->
       <div class="goodName">{{ goodsData?.name }}</div>
     </div>
     <div class="core">
-      <!-- <button @click="handleCan">11</button> -->
-      <!-- <div class="showCan">
-          <el-button @click="handleCan" v-show="!isCanShow" round>3D演示</el-button>
-          <el-button @click="handleCan" v-show="isCanShow">关闭演示</el-button>
-        </div> -->
       <div class="container">
         <div>
           <div class="goodInfo">
-            <!-- <h1 class="goodName">{{ goodsData?.name }}</h1> -->
             <span class="goodInt">{{ goodsData?.introduce }}</span>
             <el-button
               @click="previewVisible = true"
               v-if="goodsData?.draw != ''"
               >预览图纸</el-button
             >
-            <el-dialog v-model="previewVisible" class="previewImg">
+            <el-dialog v-model="previewVisible" class="previewImg" top="2vh">
               <img w-full :src="goodsData?.draw" alt="预览图纸" />
             </el-dialog>
           </div>
@@ -73,9 +74,9 @@
               <div @click="handleJump('details')">详情</div>
             </template>
           </el-tab-pane>
-          <el-tab-pane label="商家地址" name="storeAddress">
+          <el-tab-pane label="商家" name="storeAddress">
             <template #label>
-              <div @click="handleJump('storeAddress')">商家地址</div>
+              <div @click="handleJump('storeAddress')">商家</div>
             </template>
           </el-tab-pane>
         </el-tabs>
@@ -123,9 +124,22 @@
         </div>
         <div class="content">
           <div class="details">
-            <video class="video" controls v-if="goodsData?.video">
-              <source :src="goodsData?.video" type="video/mp4" />
-            </video>
+            <div class="videoWrap">
+              <el-button
+                :icon="CaretRight"
+                circle
+                @click="playVideo"
+                v-if="!isControl"
+              />
+              <video
+                id="goodVideo"
+                class="video"
+                :controls="isControl"
+                v-if="goodsData?.video"
+              >
+                <source :src="goodsData?.video" type="video/mp4" />
+              </video>
+            </div>
             <el-image
               v-for="(item, index) in goodsData?.introImgs"
               :key="index"
@@ -134,9 +148,18 @@
           </div>
         </div>
         <div class="lineBox" id="storeAddress">
-          <el-divider>地图</el-divider>
+          <el-divider>商家</el-divider>
         </div>
         <div>
+          <!-- 商家信息 -->
+          <div v-if="merchantData">
+            <div class="merName">{{ merchantData.name }}</div>
+            <el-image
+              v-for="(item, index) in merchantData.merImg"
+              :key="index"
+              :src="item"
+            ></el-image>
+          </div>
           <!-- 地图 -->
           <CustomMap
             :width="598"
@@ -151,16 +174,26 @@
   </el-dialog>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, reactive, ref, watch } from "vue";
+import { CaretRight } from "@element-plus/icons-vue";
+import {
+  defineComponent,
+  onMounted,
+  reactive,
+  ref,
+  VideoHTMLAttributes,
+  watch,
+} from "vue";
 import { goods } from "./publicData";
 import CustomMap from "../customMap/index.vue";
 import Baidu from "../../views/map/baidu.vue";
 import bus from "@/views/board/utils/bus";
 import { partBblon } from "./partBblon";
+import Video from "wangeditor/dist/menus/video";
 export default defineComponent({
   components: { CustomMap, Baidu },
   props: ["innerVisible", "currentId"],
   setup(props, context) {
+    let isControl = ref(false);
     let previewVisible = ref(false);
     let handleCan = () => {
       let partCan = document.getElementById("partCanvas") as HTMLCanvasElement;
@@ -169,16 +202,28 @@ export default defineComponent({
     let visible = true;
     let goodsData = ref({});
     let goodsId = ref("");
+    let merchantData = ref({});
     const activeName = ref<string>("evaluate");
     const getData = () => {
       let goodsInfo = JSON.parse(localStorage.getItem("goodsInfo"))
         ? JSON.parse(localStorage.getItem("goodsInfo"))
         : goods;
-      let filterData = goodsInfo.filter((item) => {
+      let filterData = goodsInfo.find((item) => {
         return item.id == goodsId.value;
       });
-      goodsData.value = filterData ? filterData[0] : {};
+      goodsData.value = filterData ? filterData : {};
       console.log(goodsData, "goodsData");
+      //商家信息
+      let merchantInfo = JSON.parse(localStorage.getItem("merchantList"));
+      console.log(merchantInfo, "商家列表");
+
+      let merchantFilter = merchantInfo.find((item) => {
+        item.id = filterData.merId;
+        return item;
+      });
+      console.log(merchantFilter, "商家数据");
+
+      merchantData.value = merchantFilter ? merchantFilter : {};
     };
     const handleJump = (id) => {
       //counter1是绑定的点击事件名称
@@ -211,6 +256,12 @@ export default defineComponent({
       bus.emit("applyPart", goodsId.value);
       context.emit("changeInnerVisible", true);
     };
+    let playVideo = () => {
+      isControl.value = true;
+      let play = document.getElementById("goodVideo") as HTMLVideoElement;
+      play.play();
+      // play.play()
+    };
     return {
       visible,
       goodsData,
@@ -222,6 +273,10 @@ export default defineComponent({
       handleCan,
       // isCanShow,
       previewVisible,
+      isControl,
+      CaretRight,
+      playVideo,
+      merchantData,
     };
   },
 });
@@ -250,6 +305,36 @@ export default defineComponent({
 }
 .el-backtop__icon {
   font-size: 30px;
+}
+
+.goodInfo .el-dialog__body {
+  padding: 0;
+}
+
+.bannerWrap .el-carousel__button {
+  width: 7px;
+  height: 7px;
+  border-radius: 20px;
+}
+
+.videoWrap {
+  position: relative;
+}
+
+.videoWrap .el-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: -35px;
+  margin-left: -35px;
+  border-color: black;
+  width: 70px;
+  height: 70px;
+  font-size: 55px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 500px !important;
+  color: #a2a2a2;
+  z-index: 1;
 }
 </style>
 <style scoped>
@@ -374,7 +459,7 @@ export default defineComponent({
 
 .goodName {
   position: absolute;
-  bottom: 0px;
+  top: 0px;
   background-color: rgb(0 0 0 / 40%);
   z-index: 11;
   width: 180px;
@@ -394,5 +479,13 @@ export default defineComponent({
   width: 60px;
   height: 60px;
   bottom: 60px;
+}
+
+.merName {
+  margin: 0 auto;
+  width: 100%;
+  height: 50px;
+  text-align: center;
+  font-size: 25px;
 }
 </style>

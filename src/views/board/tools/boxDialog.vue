@@ -31,6 +31,7 @@
 </template>
 
 <script lang="ts">
+import { useStore } from "vuex";
 import { defineComponent, ref, reactive } from "vue";
 import BabylonScene from "../BabylonScene.vue";
 import bus from "../utils/bus";
@@ -39,6 +40,7 @@ export default defineComponent({
     BabylonScene,
   },
   setup() {
+    const store = useStore();
     let isBuild = ref<boolean>(true);
     const formData = reactive({
       height: 18,
@@ -47,6 +49,7 @@ export default defineComponent({
     });
 
     function buildBox(val) {
+      store.commit("closeCollapse");
       bus.emit("boxSize", val);
       isBuild.value = false;
     }

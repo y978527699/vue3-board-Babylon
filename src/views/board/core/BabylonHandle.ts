@@ -18,6 +18,7 @@ import {
   InputText,
 } from "@babylonjs/gui";
 import earcut from "earcut";
+import { ElMessage, ElMessageBox } from "element-plus";
 export class BabylonHandle {
   scene: Scene;
   engine: Engine;
@@ -82,6 +83,12 @@ export class BabylonHandle {
       scene
     );
 
+    new BABYLON.HemisphericLight(
+      "light2",
+      new BABYLON.Vector3(-800, 1500, -200),
+      scene
+    );
+
     var light = new BABYLON.PointLight(
       "pointLight",
       new BABYLON.Vector3(-100, 1500, 300),
@@ -126,6 +133,15 @@ export class BabylonHandle {
           scene.onPointerDown = null;
         }
       }
+      if (keyBoardInfo.event.key == "Backspace") {
+        this.selectMesh.forEach((item) => {
+          this[item.name + "DisArr"].forEach((disItem) => {
+            disItem.dispose();
+          });
+          item.dispose();
+        });
+        this.selectMesh = [];
+      }
     });
 
     //监听鼠标点击事件
@@ -158,20 +174,26 @@ export class BabylonHandle {
       // return;
       switch (pointerInfo.type) {
         case BABYLON.PointerEventTypes.POINTERDOWN:
-          if (
-            (pointerInfo.pickInfo!.hit && pickMesh?.name == "poly") ||
-            pickMesh?.name == "cylinder"
-          ) {
-            if (this.selectMesh.length > 1) {
-              this.currentParent && this.clearChild(this.currentParent);
-              let ind = this.selectMesh.indexOf(pickMesh);
+          // if (
+          //   (pointerInfo.pickInfo!.hit && pickMesh?.name == "poly") || pickMesh?.name == "cylinder"
+          // ) {
+          //   if (this.selectMesh.length > 1) {
+          //     this.currentParent && this.clearChild(this.currentParent);
+          //     let ind = this.selectMesh.indexOf(pickMesh);
 
-              this.currentParent = ind;
-              // this.addSeleChild(ind)
-              this.pointerDown(pickMesh);
-            } else {
-              this.pointerDown(pickMesh);
-            }
+          //     this.currentParent = ind;
+          //     // this.addSeleChild(ind)
+          //     this.pointerDown(pickMesh);
+          //   } else {
+          //     this.pointerDown(pickMesh);
+          //   }
+          // }
+          let canMove =
+            (pointerInfo.pickInfo!.hit && pickMesh?.name == "hole") ||
+            pickMesh?.name == "cylinder" ||
+            pickMesh?.name == "bbqBox";
+          if (canMove) {
+            this.pointerDown(pickMesh);
           }
           if (pickMesh == null || pickMesh?.name == "editBox") {
             this.hl && this.hl.removeAllMeshes();
@@ -207,28 +229,6 @@ export class BabylonHandle {
     }
   }
 
-  //天空盒子
-  skyBox() {
-    const skyBox = BABYLON.MeshBuilder.CreateBox(
-        "skyBox",
-        {
-          size: 2000.0,
-        },
-        this.scene
-      ),
-      skyBoxMaterial = new BABYLON.StandardMaterial("skyBox", this.scene);
-    skyBoxMaterial.backFaceCulling = false;
-    skyBoxMaterial.reflectionTexture = new BABYLON.CubeTexture(
-      "../../../static/images/textures/box",
-      this.scene
-    );
-    skyBoxMaterial.reflectionTexture.coordinatesMode =
-      BABYLON.Texture.SKYBOX_MODE;
-    skyBoxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
-    skyBoxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
-    skyBox.material = skyBoxMaterial;
-  }
-
   //创建初始板材
   createInitialBox(width: number, height: number, depth: number): Mesh {
     this.width = Number(width);
@@ -247,7 +247,6 @@ export class BabylonHandle {
     this.camera.radius = maxData * 2;
     this.camera.wheelPrecision = 0.3;
     this.camera.panningSensibility = 5;
-
     return box;
   }
 
@@ -266,7 +265,7 @@ export class BabylonHandle {
   editPatterm() {
     if (this.editBox && this.editHoleBox) {
       this.editBox.isVisible = true;
-      this.editHoleBox.isVisible = true;
+      this.editHoleBox && (this.editHoleBox.isVisible = true);
       this.box.isVisible = false;
       if (this.part) {
         this.part.isVisible = true;
@@ -282,7 +281,9 @@ export class BabylonHandle {
       );
       this.getBoxPosition();
       this.createBoxMesLine();
-      this.createHoleGUI(this.editHoleBox);
+
+      //可输入面板
+      // this.createHoleGUI(this.editHoleBox);
       return;
     }
     let editBox = this.box.clone("editBox");
@@ -321,11 +322,19 @@ export class BabylonHandle {
         this.holeDisArr
       );
     } else if (this.currentMesh == this.part) {
-      this.partDisArr = this.createGrooMeasureLine(
+      this.cylinderDisArr = this.createGrooMeasureLine(
         this.currentMesh,
         this.partWidth,
         this.parDepth,
-        this.partDisArr
+        this.cylinderDisArr
+      );
+    } else if (this.currentMesh == this.bbqBox) {
+      this.bbqBoxDisArr = this.createForwardLine(
+        this.currentMesh,
+        this.bbqWidth,
+        this.bbqHeight,
+        this.bbqDepth,
+        this.bbqBoxDisArr
       );
     }
 
@@ -339,6 +348,8 @@ export class BabylonHandle {
   xboxLength;
 
   pointerDown(mesh) {
+    console.log(mesh);
+
     this.currentMesh = mesh;
     this.startingPoint = this.getBoxPosition();
 
@@ -362,6 +373,20 @@ export class BabylonHandle {
     //     z: this.currentMesh.position.z,
     //   };
     // }
+    if (
+      this.bbqX &&
+      this.bbqY &&
+      this.bbqX >= 0 &&
+      this.bbqY >= 0 &&
+      this.bbqX <= this.width - this.bbqY &&
+      this.bbqY <= this.height - this.bbqHeight
+    ) {
+      this.startPosition = {
+        x: this.currentMesh.position.x,
+        y: this.currentMesh.position.y,
+        z: this.currentMesh.position.z,
+      };
+    }
   }
 
   pointerUp() {
@@ -387,6 +412,35 @@ export class BabylonHandle {
       //     });
       //   });
       // }
+      if (
+        this.bbqX &&
+        this.bbqY &&
+        this.bbqX >= 0 &&
+        this.bbqY >= 0 &&
+        this.bbqX <= this.width - this.bbqY &&
+        this.bbqY <= this.height - this.bbqHeight
+      ) {
+        this.currentMesh.position.x = this.startPosition.x;
+        this.currentMesh.position.z = this.startPosition.z;
+        this.currentMesh.position.y = this.startPosition.y;
+        this.bbqBoxDisArr = this.createForwardLine(
+          this.bbqBox,
+          this.bbqWidth,
+          this.bbqHeight,
+          this.bbqDepth,
+          this.bbqBoxDisArr
+        );
+        ElMessageBox.confirm("不可超过板材大小", "提示", {
+          confirmButtonText: "确认",
+          type: "warning",
+        }).then(() => {
+          this.getBoxPosition();
+          ElMessage({
+            type: "warning",
+            message: "移动失败",
+          });
+        });
+      }
 
       this.camera.attachControl(this.canvas, true);
       this.startingPoint = null;
@@ -438,6 +492,12 @@ export class BabylonHandle {
       radiusInp.color = "white";
       radiusInp.focusedBackground = "#3f3f3f";
       radiusInp.background = "#808080 ";
+      radiusInp.onFocusSelectAll = true;
+
+      // radiusInp.onFocusObservable.add((item) => {
+      //   console.log(item, "11111");
+      //   item.onFocusSelectAll = true;
+      // });
 
       radiusInp.onBlurObservable.add((itemInp1) => {
         let inpWidth = Number(itemInp1.text.slice(3)) * 2;
@@ -623,6 +683,7 @@ export class BabylonHandle {
     xBoxInp.background = "#0066ff";
     xBoxInp.thickness = 0;
     let inpXText = "";
+    xBoxInp.onFocusSelectAll = true;
     xBoxInp.onBlurObservable.add((xBoxItem) => {
       if (xBoxItem.text == inpXText) {
         return;
@@ -692,6 +753,7 @@ export class BabylonHandle {
     yBoxInp.background = "#0066ff";
     yBoxInp.thickness = 0;
     let inpYText = "";
+    yBoxInp.onFocusSelectAll = true;
     yBoxInp.onBlurObservable.add((yBoxItem) => {
       if (yBoxItem.text == inpYText) {
         return;
@@ -755,6 +817,7 @@ export class BabylonHandle {
     zBoxInp.background = "#0066ff";
     zBoxInp.thickness = 0;
     let inpZText = "";
+    zBoxInp.onFocusSelectAll = true;
     zBoxInp.onBlurObservable.add((zBoxItem) => {
       if (zBoxItem.text == inpZText) {
         return;
@@ -857,7 +920,7 @@ export class BabylonHandle {
     }
 
     //槽
-    const poly = new PolygonMeshBuilder("poly", corners, this.scene, earcut);
+    const poly = new PolygonMeshBuilder("hole", corners, this.scene, earcut);
 
     const polygon = poly.build(true, height + 0.5);
 
@@ -875,7 +938,8 @@ export class BabylonHandle {
       this.holeDisArr
     );
 
-    this.createHoleGUI(this.editHoleBox);
+    //可输入面板
+    // this.createHoleGUI(this.editHoleBox);
 
     let ind = this.holeArr.indexOf(this.editHoleBox);
     if (ind != -1) {
@@ -913,21 +977,24 @@ export class BabylonHandle {
         item.dispose();
       });
     }
-    if (this.partDisArr) {
-      this.partDisArr.forEach((item) => {
+    if (this.cylinderDisArr) {
+      this.cylinderDisArr.forEach((item) => {
         item.dispose();
       });
     }
+    if (this.bbqBox) {
+      this.bbqBox.isVisible = false;
+    }
     this.editBox.isVisible = false;
-    this.editHoleBox.isVisible = false;
-    this.panelAdvancedTexture.dispose();
+    this.editHoleBox && (this.editHoleBox.isVisible = false);
+    this.panelAdvancedTexture && this.panelAdvancedTexture.dispose();
     this.mesBoxAdvancedTexture.dispose();
     this.xLine.dispose();
     this.yLine.dispose();
     this.zLine.dispose();
-    this.incPlaneLeft.isVisible = false;
-    this.incPlaneRight.isVisible = false;
-    this.insideHole.isVisible = false;
+    this.incPlaneLeft && (this.incPlaneLeft.isVisible = false);
+    this.incPlaneRight && (this.incPlaneRight.isVisible = false);
+    this.insideHole && (this.insideHole.isVisible = false);
   }
 
   incMaterial;
@@ -1107,7 +1174,9 @@ export class BabylonHandle {
       this.holeHeight,
       this.editBox
     );
-    this.createHoleGUI(this.editHoleBox);
+
+    //可输入面板
+    // this.createHoleGUI(this.editHoleBox);
     this.createBoxMesLine();
     this.createTarget();
   }
@@ -1131,7 +1200,7 @@ export class BabylonHandle {
 
   //创建配件
   part;
-  partDisArr;
+  cylinderDisArr;
   partWidth;
   parDepth;
   partHoleArr;
@@ -1185,11 +1254,11 @@ export class BabylonHandle {
     this.holeArr.push(partHole, partHole1, partHole2);
     this.part = cylinder;
     this.partHoleArr = [partHole, partHole1, partHole2];
-    this.partDisArr = this.createGrooMeasureLine(
+    this.cylinderDisArr = this.createGrooMeasureLine(
       cylinder,
       this.partWidth,
       this.parDepth,
-      this.partDisArr
+      this.cylinderDisArr
     );
   }
 
@@ -1204,7 +1273,7 @@ export class BabylonHandle {
       height = 10;
     }
     if (disArr) {
-      for (let i = 0; i < disArr.length - 2; i++) {
+      for (let i = 0; i < disArr.length; i++) {
         disArr[i].dispose();
       }
     }
@@ -1225,7 +1294,7 @@ export class BabylonHandle {
       0
     );
 
-    let dotX = this.createPun(mesXBox, xBoxLength, 0, 0);
+    // let dotX = this.createPun(mesXBox, xBoxLength, 0, 0);
 
     //底部假量尺
     let matZ = Math.round(mesh.getWorldMatrix().m[14]);
@@ -1241,7 +1310,7 @@ export class BabylonHandle {
       height,
       -yBoxLength / 2 - depth / 2
     );
-    let dotY = this.createPun(mesYBox, 0, 0, yBoxLength);
+    // let dotY = this.createPun(mesYBox, 0, 0, yBoxLength);
 
     //创建可输入槽距数据展示
     let mesAdvancedTexture = AdvancedDynamicTexture.CreateFullscreenUI(
@@ -1264,6 +1333,7 @@ export class BabylonHandle {
     mesxInp.focusedBackground = "#3f3f3f";
     mesxInp.background = "#808080 ";
     mesxInp.thickness = 0;
+    mesxInp.onFocusSelectAll = true;
     mesxInp.onBlurObservable.add((mesXItem) => {
       let newXLength = Number(mesXItem.text);
       mesXBox.scaling = new BABYLON.Vector3(newXLength / xBoxLength, 1, 1);
@@ -1290,32 +1360,181 @@ export class BabylonHandle {
     mesyInp.focusedBackground = "#3f3f3f";
     mesyInp.background = "#808080 ";
     mesyInp.thickness = 0;
+    mesyInp.onFocusSelectAll = true;
     mesyInp.onBlurObservable.add((mesYItem) => {
-      // let newYLength = Number(mesYItem.text);
-      // this.mesYBox.scaling = new BABYLON.Vector3(
-      //   1,
-      //   1,
-      //   newYLength / this.yBoxLength
-      // );
-      // this.editHoleBox.position.z =
-      //   newYLength + this.holeDepth / 2 - Number(this.depth) / 2;
-      // this.mesYBox.position.z = -(newYLength / 2 + this.holeDepth / 2);
-      // mesyInp.text = mesYItem.text
+      let newYLength = Number(mesYItem.text);
+      mesYBox.scaling = new BABYLON.Vector3(1, 1, newYLength / yBoxLength);
+      this.editHoleBox.position.z =
+        newYLength + this.holeDepth / 2 - Number(this.depth) / 2;
+      mesYBox.position.z = -(newYLength / 2 + this.holeDepth / 2);
+      mesyInp.text = mesYItem.text;
     });
     recty.addControl(mesyInp);
 
-    let retDisArr = [mesXBox, mesYBox, mesAdvancedTexture, dotX, dotY];
+    // let retDisArr = [mesXBox, mesYBox, mesAdvancedTexture, dotX, dotY];
+    let retDisArr = [mesXBox, mesYBox, mesAdvancedTexture];
 
     return retDisArr;
   }
 
   //蒸烤箱
-  createbbqBox(width: number, height: number, depth: number) {
+  bbqBox;
+  bbqWidth;
+  bbqHeight;
+  bbqDepth;
+  bbqBoxDisArr;
+  dotX;
+  createbbqBox(width: number, height: number, depth: number, y: number = 1450) {
+    this.bbqWidth = width;
+    this.bbqHeight = height;
+    this.bbqDepth = depth;
+    y = y - this.height / 2 - height / 2;
+    if (this.height < height) {
+      y = 0;
+    }
     let bbqBox = BABYLON.MeshBuilder.CreateBox(
       "bbqBox",
       { width, height, depth },
       this.scene
     );
+    let bbqMaterial = new BABYLON.StandardMaterial("bbqMaterial", this.scene);
+    bbqMaterial.diffuseTexture = new BABYLON.Texture(
+      require("@/static/images/bbqBoxTex.png"),
+      this.scene
+    );
+    bbqBox.material = bbqMaterial;
+    bbqBox.position = new BABYLON.Vector3(
+      0,
+      y,
+      -this.depth / 2 + depth / 2 - 0.5
+    );
+
+    this.bbqBoxDisArr = this.createForwardLine(
+      bbqBox,
+      width,
+      height,
+      depth,
+      this.bbqBoxDisArr
+    );
+    this.bbqBox = bbqBox;
+    this.holeArr.push(this.bbqBox);
+  }
+
+  bbqX;
+  bbqY;
+  createForwardLine(mesh: Mesh, width, height, depth, disArr) {
+    if (disArr) {
+      for (let i = 0; i < disArr.length; i++) {
+        disArr[i].dispose();
+      }
+    }
+
+    //侧面假量尺
+    let matX = Math.round(mesh.getWorldMatrix().m[12]);
+
+    let xBoxLength = this.width / 2 + matX - width / 2;
+    this.bbqX = xBoxLength;
+    let mesXBox = BABYLON.MeshBuilder.CreateBox(
+      "mesXBox",
+      { width: xBoxLength, height: 5, depth: 5 },
+      this.scene
+    );
+
+    mesXBox.setParent(mesh);
+    mesXBox.position = new BABYLON.Vector3(
+      -xBoxLength / 2 - width / 2,
+      0,
+      -depth / 2
+    );
+
+    // this.dotX = this.createPun(mesXBox, xBoxLength, 0, 0);
+
+    //底部假量尺
+    let matY = Math.round(mesh.getWorldMatrix().m[13]);
+    let yBoxLength = this.height / 2 + matY - height / 2;
+    this.bbqY = yBoxLength;
+
+    let mesYBox = BABYLON.MeshBuilder.CreateBox(
+      "mesYBox",
+      {
+        width: 5,
+        height: yBoxLength,
+        depth: 5,
+      },
+      this.scene
+    );
+    mesYBox.setParent(mesh);
+    mesYBox.position = new BABYLON.Vector3(
+      0,
+      -yBoxLength / 2 - height / 2,
+      -depth / 2
+    );
+    // let dotY = this.createPun(mesYBox, 0, 0, yBoxLength);
+
+    //创建可输入槽距数据展示
+    let bbqAdvancedTexture = AdvancedDynamicTexture.CreateFullscreenUI(
+      "bbqAdvancedTexture"
+    );
+
+    let rectx = new Rectangle();
+    rectx.width = "60px";
+    rectx.height = "20px";
+    rectx.cornerRadius = 20;
+    rectx.background = "#808080";
+    rectx.alpha = 0.5;
+    bbqAdvancedTexture.addControl(rectx);
+    rectx.linkWithMesh(mesXBox);
+    rectx.linkOffsetY = -15;
+
+    let mesxInp = new InputText();
+    mesxInp.text = `${xBoxLength}`;
+    mesxInp.color = "white";
+    mesxInp.focusedBackground = "#3f3f3f";
+    mesxInp.background = "#808080 ";
+    mesxInp.thickness = 0;
+    mesxInp.onFocusSelectAll = true;
+    mesxInp.onBlurObservable.add((mesXItem) => {
+      let newXLength = Number(mesXItem.text);
+      mesXBox.scaling = new BABYLON.Vector3(newXLength / xBoxLength, 1, 1);
+      mesh.position.x = newXLength + width / 2 - this.width / 2;
+      mesXBox.position.x = -(newXLength / 2 + width / 2);
+      mesxInp.text = mesXItem.text;
+    });
+    rectx.addControl(mesxInp);
+
+    let recty = new Rectangle();
+    recty.width = "60px";
+    recty.height = "20px";
+    recty.cornerRadius = 20;
+    recty.background = "#808080";
+    recty.alpha = 0.5;
+    bbqAdvancedTexture.addControl(recty);
+    recty.linkWithMesh(mesYBox);
+    recty.linkOffsetX = 30;
+
+    let mesyInp = new InputText();
+    mesyInp.text = `${yBoxLength}`;
+    mesyInp.color = "white";
+    mesyInp.focusedBackground = "#3f3f3f";
+    mesyInp.background = "#808080 ";
+    mesyInp.thickness = 0;
+    mesyInp.onFocusSelectAll = true;
+    mesyInp.onBlurObservable.add((mesYItem) => {
+      let newYLength = Number(mesYItem.text);
+      mesYBox.scaling = new BABYLON.Vector3(1, newYLength / yBoxLength, 1);
+      mesh.position.y = newYLength + height / 2 - this.height / 2;
+      mesYBox.position.y = -(newYLength / 2 + height / 2);
+      mesyInp.text = mesYItem.text;
+    });
+    recty.addControl(mesyInp);
+
+    let retDisArr = [mesXBox, mesYBox, bbqAdvancedTexture];
+    return retDisArr;
+  }
+
+  recCamera() {
+    this.camera.position = new BABYLON.Vector3(0, 1200, -2000);
+    this.camera.setTarget(BABYLON.Vector3.Zero());
   }
 }
 

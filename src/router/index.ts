@@ -70,6 +70,15 @@ export const DynamicRoutes = [
     },
     children: [
       {
+        path: "Home",
+        component: () => import("@/views/home/index.vue"),
+        name: "home",
+        meta: {
+          name: "首页",
+          icon: "el-icon-s-operation",
+        },
+      },
+      {
         path: "Product",
         component: () => import("@/views/board/index.vue"),
         name: "product",

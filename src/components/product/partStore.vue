@@ -32,13 +32,33 @@
             <template #prepend> 有屋配件库 </template>
           </el-input>
         </div>
+        <el-popover placement="bottom" :width="50" trigger="hover">
+          <div class="userWrap">
+            <el-button text @click="merchantHandle">店铺</el-button>
+            <el-button text>关于版本</el-button>
+          </div>
+          <template #reference>
+            <div class="avatar">
+              <el-avatar
+                size="small"
+                src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"
+              />
+              <!-- <span class="userName">用户</span> -->
+            </div>
+          </template>
+        </el-popover>
       </template>
 
       <template #default>
         <!-- 添加商品按钮 -->
-        <el-button type="primary" circle class="addBtn" @click="uploadHandle">
+        <!-- <el-button type="primary" circle class="addBtn" @click="uploadHandle">
           <el-icon><Plus /></el-icon>
-        </el-button>
+        </el-button> -->
+
+        <!-- 店铺按钮 -->
+        <!-- <el-button type="primary" circle class="addBtn" @click="merchantBtn">
+          店铺
+        </el-button> -->
 
         <!-- 轮播图 -->
         <el-carousel
@@ -130,6 +150,18 @@
           @changeDiaVisible="uploadHandle"
           :pId="pId"
         ></upload-view>
+
+        <merchant
+          v-if="merchantShow"
+          @changeDiaVisible="merchantHandle"
+          :merId="merId"
+        ></merchant>
+
+        <!-- <test-upload
+          v-if="uploadShow"
+          @changeDiaVisible="uploadHandle"
+          :pId="pId"
+        ></test-upload> -->
       </template>
     </el-dialog>
   </div>
@@ -138,11 +170,19 @@
 <script lang="ts">
 import { getCurrentInstance, onMounted, reactive, ref } from "vue";
 import ShowDialog from "./showDialog.vue";
-import { menuList, productsList, lineImgs } from "./publicData";
+import {
+  menuList,
+  productsList,
+  lineImgs,
+  merchant,
+  goods,
+} from "./publicData";
 import bus from "@/views/board/utils/bus";
 import { Plus, Search } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import UploadView from "./uploadView.vue";
+// import TestUpload from "./testUpload.vue";
+import Merchant from "./merchant/merchant.vue";
 
 export default {
   setup() {
@@ -196,9 +236,29 @@ export default {
       bannerInd.value = ind;
     };
 
+    //店铺按钮
+    let merId = ref("01");
+    let merchantShow = ref(false);
+    let merchantBtn = () => {
+      merchantShow.value = true;
+    };
+    let merchantHandle = () => {
+      merchantShow.value = !merchantShow.value;
+    };
+
     onMounted(() => {
+      if (localStorage.getItem("productsList") == null) {
+        localStorage.setItem("productsList", JSON.stringify(productsList));
+      }
+      if (localStorage.getItem("merchantList") == null) {
+        localStorage.setItem("merchantList", JSON.stringify(merchant));
+      }
+      if (localStorage.getItem("goodsInfo") == null) {
+        localStorage.setItem("goodsInfo", JSON.stringify(goods));
+      }
+
       pId.value = "0010101";
-      let dataList = JSON.parse(localStorage.getItem("productsList"))
+      let dataList = localStorage.getItem("productsList")
         ? JSON.parse(localStorage.getItem("productsList"))
         : productsList;
       console.log(dataList, "获取全部产品列表");
@@ -232,9 +292,13 @@ export default {
       pId,
       handleBannerChange,
       bannerInd,
+      merchantBtn,
+      merId,
+      merchantShow,
+      merchantHandle,
     };
   },
-  components: { ShowDialog, Plus, Search, UploadView },
+  components: { ShowDialog, Plus, Search, UploadView, Merchant },
 };
 </script>
 
@@ -440,5 +504,28 @@ li .el-icon-plus {
 
 .partStoreWrap .el-overlay-dialog {
   overflow: hidden;
+}
+
+.avatar {
+  position: absolute;
+  right: 50px;
+  top: 20px;
+  display: flex;
+  flex-direction: column;
+}
+.avatar .userName {
+  font-size: 10px;
+}
+
+.el-popover.el-popper {
+  text-align: center;
+  padding: 0;
+  min-width: 100px;
+}
+.userWrap .el-button {
+  width: 100%;
+  border-radius: 0 !important;
+  font-size: 13px;
+  margin: 0;
 }
 </style>

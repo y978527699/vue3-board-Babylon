@@ -6,6 +6,7 @@
         :class="{ active: state.isSidebarNavCollapse }"
         @click="toggleNavCollapse"
       >
+        <el-icon><ArrowRight /></el-icon>
       </span>
       <el-breadcrumb separator="/">
         <transition-group name="breadcrumb">
@@ -56,13 +57,14 @@
   </div>
 </template>
 <script lang="ts">
+import { ArrowRight } from "@element-plus/icons-vue";
 import { computed, defineComponent, reactive } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import screenfull from "screenfull";
 import { SwitchButton } from "@element-plus/icons-vue";
 export default defineComponent({
-  components: { SwitchButton },
+  components: { SwitchButton, ArrowRight },
   setup() {
     const store = useStore();
     const router = useRouter();

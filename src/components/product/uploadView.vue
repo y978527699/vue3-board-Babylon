@@ -308,7 +308,7 @@
                   </el-upload>
 
                   <el-dialog v-model="introVisible" class="previewImg">
-                    <img w-full :src="introImageUrl" alt="Preview Image" />
+                    <img w-full :src="introTecImageUrl" alt="Preview Image" />
                   </el-dialog>
                 </el-form-item>
               </el-col>
@@ -344,7 +344,42 @@
             </el-row>
           </el-form>
         </el-tab-pane>
-        <el-tab-pane label="企业主页">主页维护</el-tab-pane>
+        <!-- <el-tab-pane label="企业主页">
+          <el-form
+            label-width="100px"
+            :model="uploadForm"
+            ref="ruleFormRef"
+            :rules="rules"
+            class="uploadForm"
+          >
+            <el-form-item label="商家名" prop="merName">
+              <el-input
+                v-model="uploadForm.merchant.name"
+                placeholder="请输入商家名"
+              />
+            </el-form-item>
+            <el-form-item label="商家图片" prop="merImg">
+              <el-upload
+                v-model:file-list="uploadForm.merchant.merImg"
+                list-type="picture-card"
+                :on-preview="handleMerchantPreview"
+                :on-remove="handleMerchantRemove"
+                :multiple="true"
+                :accept="'.jpg,.png'"
+                :auto-upload="false"
+              >
+                <el-icon><Plus /></el-icon>
+              </el-upload>
+
+              <el-dialog v-model="merchantVisible">
+                <img
+                  w-full
+                  :src="merchantImageUrl"
+                  alt="公司图片"
+                /> </el-dialog
+            ></el-form-item>
+          </el-form>
+        </el-tab-pane> -->
       </el-tabs>
 
       <template #footer>
@@ -428,8 +463,16 @@ export default defineComponent({
             draw = require("@/static/images/partImg/" +
               uploadForm.draw[0].name);
           }
+          // let merImg = uploadForm.merchant.merImg.map((item) => {
+          //   return require("@/static/images/partImg/" + item.name);
+          // });
+          // let merchant = {
+          //   name: uploadForm.merchant.name,
+          //   merImg,
+          // };
           let setList = {
             id,
+            merId: "01",
             name: uploadForm.name,
             introduce: uploadForm.introduce,
             bannerImgs,
@@ -440,6 +483,7 @@ export default defineComponent({
             evaluate: uploadForm.evaluate,
             cover: require("@/static/images/partImg/" +
               uploadForm.cover[0].name),
+            // merchant,
           };
 
           goods.push(setList);
@@ -508,6 +552,10 @@ export default defineComponent({
         installDraw: [],
         installVideo: "",
       },
+      // merchant: {
+      //   name: "",
+      //   merImg: [],
+      // },
     });
     const rules = reactive<FormRules>({
       name: [
@@ -701,6 +749,21 @@ export default defineComponent({
       tecImgVisible.value = true;
     };
 
+    //公司信息
+    //公司图片
+    // const merchantImageUrl = ref("");
+    // const merchantVisible = ref(false);
+    // let handleMerchantPreview = (uploadFile) => {
+    //   merchantImageUrl.value = uploadFile.url!;
+    //   tecImgVisible.value = true;
+    // };
+    // let handleMerchantRemove = (uploadFile) => {
+    //   uploadForm.merchant.merImg.splice(
+    //     uploadForm.merchant.merImg.indexOf(uploadFile),
+    //     1
+    //   );
+    // };
+
     return {
       dialogVisible,
       handleClose,
@@ -750,6 +813,13 @@ export default defineComponent({
       handleTecIntroPreview,
       handleTecIntroRemove,
       ruleTecFormRef,
+      introTecImageUrl,
+
+      //公司信息
+      // merchantImageUrl,
+      // merchantVisible,
+      // handleMerchantPreview,
+      // handleMerchantRemove,
     };
   },
 });

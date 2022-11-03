@@ -44,8 +44,8 @@ export default {
 
 <style lang="scss" scoped>
 #cabCanvas {
-  width: 100%;
-  height: calc(100vh - 54px);
+  width: 100vw;
+  height: 100vh;
   position: relative;
 }
 </style>
