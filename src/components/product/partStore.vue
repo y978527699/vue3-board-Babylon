@@ -244,6 +244,10 @@ export default {
     };
     let merchantHandle = () => {
       merchantShow.value = !merchantShow.value;
+      let newList = JSON.parse(localStorage.getItem("productsList"));
+      let filterList = newList.filter((item) => item.pId == pId.value);
+      list.value = filterList[0] ? filterList[0].content : [];
+      console.log(list.value, "获取对应产品列表");
     };
 
     onMounted(() => {
@@ -307,10 +311,15 @@ export default {
   position: unset;
 }
 .partSDia {
-  height: 97%;
+  /* height: 97% !important; */
   overflow: hidden;
   position: relative;
+  /* border-radius: 15px; */
+}
+
+.partStoreWrap .el-dialog {
   border-radius: 15px;
+  height: 97% !important;
 }
 
 .el-cascader-panel.is-bordered {

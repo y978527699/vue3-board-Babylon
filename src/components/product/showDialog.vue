@@ -5,7 +5,7 @@
     append-to-body
     @close="handleClose"
     width="50%"
-    top="2vh"
+    top="1vh"
     :destroy-on-close="true"
     :show-close="false"
   >
@@ -159,15 +159,10 @@
               :key="index"
               :src="item"
             ></el-image>
+            <!-- 地图 -->
+            <div id="allmap"></div>
+            <map-handle v-if="mapShow"></map-handle>
           </div>
-          <!-- 地图 -->
-          <CustomMap
-            :width="598"
-            :height="346"
-            :longitude="113.621058"
-            :latitude="22.931429"
-          ></CustomMap>
-          <!-- <Baidu></Baidu> -->
         </div>
       </div>
     </div>
@@ -175,24 +170,16 @@
 </template>
 <script lang="ts">
 import { CaretRight } from "@element-plus/icons-vue";
-import {
-  defineComponent,
-  onMounted,
-  reactive,
-  ref,
-  VideoHTMLAttributes,
-  watch,
-} from "vue";
+import { defineComponent, onMounted, ref, watch } from "vue";
 import { goods } from "./publicData";
-import CustomMap from "../customMap/index.vue";
-import Baidu from "../../views/map/baidu.vue";
 import bus from "@/views/board/utils/bus";
 import { partBblon } from "./partBblon";
-import Video from "wangeditor/dist/menus/video";
+import MapHandle from "../map/mapHandle.vue";
 export default defineComponent({
-  components: { CustomMap, Baidu },
+  components: { MapHandle },
   props: ["innerVisible", "currentId"],
   setup(props, context) {
+    let mapShow = ref(false);
     let isControl = ref(false);
     let previewVisible = ref(false);
     let handleCan = () => {
@@ -236,6 +223,7 @@ export default defineComponent({
     onMounted(() => {
       setTimeout(() => {
         handleCan();
+        mapShow.value = true;
       }, 1);
     });
     watch(
@@ -277,6 +265,7 @@ export default defineComponent({
       CaretRight,
       playVideo,
       merchantData,
+      mapShow,
     };
   },
 });
@@ -487,5 +476,11 @@ export default defineComponent({
   height: 50px;
   text-align: center;
   font-size: 25px;
+}
+</style>
+<style scoped>
+#allmap {
+  width: 100%;
+  height: 400px;
 }
 </style>

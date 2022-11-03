@@ -1,16 +1,16 @@
 <template>
   <div class="merchantWrap">
     <el-dialog
-      class="merchantBox"
+      custom-class="merchantBox"
       v-model="visible"
       append-to-body
       :before-close="handleClose"
       width="60%"
-      top="2vh"
+      top="1vh"
       :destroy-on-close="true"
       :show-close="false"
     >
-      <div>
+      <div class="merNameWrap">
         <span class="merName">{{ merchantData.name }}</span>
       </div>
       <div class="merBanner">
@@ -26,7 +26,7 @@
           <el-tabs
             v-model="tabActive"
             class="demo-tabs"
-            @tab-click="handleClick"
+            @tab-change="tabChange"
           >
             <el-tab-pane label="所有商品" name="allGoods">
               <div>
@@ -35,7 +35,7 @@
                     <el-icon><Plus /></el-icon>
                   </li>
                   <li
-                    class="liSty"
+                    class="merLiSty"
                     v-for="item in goodsList"
                     :key="item.id"
                     @click="goodDetails(item.id)"
@@ -72,15 +72,12 @@
               <div class="merInfo">
                 <span class="merIntro">{{ merchantData.introduce }}</span>
               </div>
+              <div id="allmap"></div>
             </el-tab-pane>
+            <map-handle v-if="mapShow"></map-handle>
           </el-tabs>
         </div>
       </div>
-      <!-- <upload-view
-        v-if="uploadShow"
-        @changeDiaVisible="uploadHandle"
-        :pId="pId"
-      ></upload-view> -->
       <mer-upload
         v-if="uploadShow"
         @changeDiaVisible="uploadHandle"
@@ -90,13 +87,15 @@
 </template>
 
 <script>
-import { onMounted, reactive, ref } from "vue-demi";
+import { nextTick, onMounted, reactive, ref } from "vue-demi";
 import { Plus } from "@element-plus/icons-vue";
 import merUpload from "./merUpload.vue";
+import mapHandle from "@/components/map/mapHandle.vue";
 export default {
-  components: { Plus, merUpload },
+  components: { Plus, merUpload, mapHandle },
   props: ["merId"],
   setup(props, context) {
+    let mapShow = ref(false);
     let tabActive = ref("allGoods");
     let visible = true;
     let merchantData = ref({});
@@ -110,13 +109,28 @@ export default {
     let uploadShow = ref(false);
     const uploadHandle = () => {
       uploadShow.value = !uploadShow.value;
-      //   let newList = JSON.parse(localStorage.getItem("productsList"));
-      //   let filterList = newList.filter((item) => item.pId == pId.value);
-      //   list.value = filterList[0] ? filterList[0].content : [];
-      //   console.log(list.value, "获取对应产品列表");
+      goodsList.value = [];
+      let goodsData = JSON.parse(localStorage.getItem("productsList"));
+      goodsData.forEach((item) => {
+        item.content.forEach((goods) => {
+          console.log(goods);
+          if (goods.merId == props.merId) {
+            goodsList.value.push(goods);
+          }
+        });
+      });
+      console.log(goodsList.value, "新列表");
     };
     let changeDiaVisible = () => {
       uploadShow.value = !uploadShow.value;
+    };
+
+    let tabChange = (value) => {
+      if (value == "merchant") {
+        setTimeout(() => {
+          mapShow.value = true;
+        }, 100);
+      }
     };
 
     onMounted(() => {
@@ -147,6 +161,8 @@ export default {
       tabActive,
       uploadShow,
       changeDiaVisible,
+      tabChange,
+      mapShow,
     };
   },
 };
@@ -203,7 +219,7 @@ export default {
   margin-top: 5px;
 }
 .merLiSty {
-  width: 150px;
+  width: 180px;
   height: 220px;
   float: left;
   margin-left: 20px;
@@ -220,6 +236,22 @@ export default {
 .merLiSty .el-icon {
   font-size: 70px;
   margin-top: 50px;
+}
+</style>
+<style scoped>
+#allmap {
+  width: 100%;
+  height: 400px;
+}
+.merNameWrap {
+  background-color: #bdced9;
+  background-image: linear-gradient(21deg, #bdced9 0%, #d8d8e3 100%);
+}
+.merNameWrap .merName {
+  margin-left: 30px;
+  font-size: 20px;
+  line-height: 50px;
+  color: white;
 }
 </style>
 <!-- <style scoped>

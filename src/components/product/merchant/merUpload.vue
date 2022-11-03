@@ -9,8 +9,8 @@
       :close-on-press-escape="false"
       :close="closeDia"
       status-icon
-      top="4vh"
-      class="uploadDialog"
+      top="6vh"
+      custom-class="uploadDialog"
     >
       <el-tabs tab-position="left" style="height: 100%" class="demo-tabs">
         <el-tab-pane label="商品信息">
@@ -30,63 +30,65 @@
                   />
                 </el-form-item>
 
-                <el-form-item label="商品分类" class="category">
+                <el-form-item label="商品分类" class="category" prop="category">
                   <el-cascader
                     :options="menuList"
-                    v-model="category"
-                    :on-change="cateChange"
+                    v-model="uploadForm.category"
+                    placeholder="请选择商品分类"
                   />
                 </el-form-item>
 
-                <el-form-item
-                  label="详情图片"
-                  prop="introImgs"
-                  class="introImgs"
-                >
-                  <el-upload
-                    list-type="picture-card"
-                    :auto-upload="false"
-                    v-model:file-list="uploadForm.introImgs"
-                    :multiple="true"
-                    :on-change="introChange"
-                    :accept="'.jpg,.png'"
+                <div class="introWarp">
+                  <el-form-item
+                    label="详情图片"
+                    prop="introImgs"
+                    class="introImgs"
                   >
-                    <el-icon><Camera /></el-icon>
+                    <el-upload
+                      list-type="picture-card"
+                      :auto-upload="false"
+                      v-model:file-list="uploadForm.introImgs"
+                      :multiple="true"
+                      :on-change="introChange"
+                      :accept="'.jpg,.png'"
+                    >
+                      <el-icon><Camera /></el-icon>
 
-                    <template #file="{ file }">
-                      <div>
-                        <img
-                          class="el-upload-list__item-thumbnail"
-                          :src="file.url"
-                          alt=""
-                        />
-                        <span class="el-upload-list__item-actions">
-                          <span
-                            class="el-upload-list__item-preview"
-                            @click="handleIntroPreview(file)"
-                          >
-                            <el-icon><zoom-in /></el-icon>
+                      <template #file="{ file }">
+                        <div>
+                          <img
+                            class="el-upload-list__item-thumbnail"
+                            :src="file.url"
+                            alt=""
+                          />
+                          <span class="el-upload-list__item-actions">
+                            <span
+                              class="el-upload-list__item-preview"
+                              @click="handleIntroPreview(file)"
+                            >
+                              <el-icon><zoom-in /></el-icon>
+                            </span>
+                            <span
+                              class="el-upload-list__item-delete"
+                              @click="handleIntroRemove(file, uploadFiles)"
+                            >
+                              <el-icon><Delete /></el-icon>
+                            </span>
                           </span>
-                          <span
-                            class="el-upload-list__item-delete"
-                            @click="handleIntroRemove(file, uploadFiles)"
-                          >
-                            <el-icon><Delete /></el-icon>
-                          </span>
-                        </span>
-                      </div>
-                    </template>
-                    <template #tip>
-                      <div class="el-upload__tip text-red">
-                        可多选文件进行上传
-                      </div>
-                    </template>
-                  </el-upload>
+                        </div>
+                      </template>
+                      <template #tip>
+                        <div class="el-upload__tip text-red">
+                          可多选文件进行上传
+                        </div>
+                      </template>
+                    </el-upload>
 
-                  <el-dialog v-model="introVisible" class="previewImg">
-                    <img w-full :src="introImageUrl" alt="Preview Image" />
-                  </el-dialog>
-                </el-form-item>
+                    <el-dialog v-model="introVisible" custom-class="previewImg">
+                      <img w-full :src="introImageUrl" alt="Preview Image" />
+                    </el-dialog>
+                  </el-form-item>
+                </div>
 
                 <el-form-item label="视频" prop="video" class="video">
                   <el-upload
@@ -157,7 +159,10 @@
                     </template>
                   </el-upload>
 
-                  <el-dialog v-model="coverDiaVisible" class="previewImg">
+                  <el-dialog
+                    v-model="coverDiaVisible"
+                    custom-class="previewImg"
+                  >
                     <img w-full :src="coverUrl" alt="封面" />
                   </el-dialog>
                 </el-form-item>
@@ -208,7 +213,7 @@
                     </template>
                   </el-upload>
 
-                  <el-dialog v-model="imgDiaVisible" class="previewImg">
+                  <el-dialog v-model="imgDiaVisible" custom-class="previewImg">
                     <img w-full :src="dialogImageUrl" alt="Preview Image" />
                   </el-dialog>
                 </el-form-item>
@@ -415,17 +420,18 @@ export default defineComponent({
             ? JSON.parse(localStorage.getItem("productsList"))
             : productsList;
 
-          // productData.forEach((item) => {
-          //   if (item.pId == props.pId) {
-          //     item.content.push({
-          //       id,
-          //       name: uploadForm.name,
-          //       src: require("@/static/images/partImg/" +
-          //         uploadForm.cover[0].name),
-          //       introduce: uploadForm.introduce,
-          //     });
-          //   }
-          // });
+          productData.forEach((item) => {
+            if (item.pId == pId) {
+              item.content.push({
+                id,
+                merId: "01",
+                name: uploadForm.name,
+                src: require("@/static/images/partImg/" +
+                  uploadForm.cover[0].name),
+                introduce: uploadForm.introduce,
+              });
+            }
+          });
 
           localStorage.setItem("productsList", JSON.stringify(productData));
 
@@ -532,7 +538,7 @@ export default defineComponent({
         installVideo: "",
         draw: [],
       },
-      category: "",
+      category: {},
     });
     const rules = reactive<FormRules>({
       name: [
@@ -563,14 +569,27 @@ export default defineComponent({
           message: "封面图片不能为空",
         },
       ],
+      category: [
+        {
+          type: "array",
+          required: true,
+          message: "商品分类不能为空",
+          trigger: "change",
+        },
+      ],
     });
 
     //商品类别
-    let category = ref({});
-    let cateChange = (value) => {
-      console.log(value);
-      console.log(category.value);
-    };
+    // let category = ref({});
+    let pId = "";
+    watch(
+      () => uploadForm.category,
+      () => {
+        for (let key in uploadForm.category) {
+          pId = uploadForm.category[key];
+        }
+      }
+    );
 
     //banner图片
     const dialogImageUrl = ref("");
@@ -648,7 +667,7 @@ export default defineComponent({
     };
     let handleCoverChange = (uploadFile, uploadFiles) => {
       hideCoverUpload.value = uploadFiles.length >= 1;
-      uploadForm.cover = uploadFile;
+      // uploadForm.cover = uploadFile;
     };
 
     //上传视频
@@ -733,10 +752,6 @@ export default defineComponent({
       tecImgVisible.value = true;
     };
 
-    watch(category, () => {
-      console.log(category.value, "11111");
-    });
-
     return {
       dialogVisible,
       handleClose,
@@ -779,8 +794,7 @@ export default defineComponent({
       introChange,
       uploadCategory,
       menuList,
-      category,
-      cateChange,
+      // category,
 
       //技术信息
       upTecVideo,
@@ -823,7 +837,7 @@ export default defineComponent({
   font-size: 10px;
   margin-left: -20px;
 }
-.uploadDialog .bannerImgs .el-form-item__content {
+.bannerImgs .el-form-item__content {
   height: 196px;
   overflow: auto;
   overflow-x: hidden;
@@ -838,10 +852,19 @@ export default defineComponent({
   background-color: #c1c1c1;
   border-radius: 6px;
 }
-.uploadDialog .introImgs .el-form-item__content {
+.bannerImgs .el-upload-list__item {
+  width: 120px;
+  height: 120px;
+}
+.introImgs .el-form-item__content {
   height: 196px;
   overflow: auto;
   overflow-x: hidden;
+}
+
+.introImgs .el-upload-list__item {
+  width: 120px;
+  height: 120px;
 }
 
 .introImgs .el-form-item__content::-webkit-scrollbar {
@@ -855,9 +878,13 @@ export default defineComponent({
 }
 
 #uploadWrap .uploadDialog {
-  height: 90%;
+  height: 80%;
   overflow: auto;
   overflow-x: hidden;
+  /* border-radius: 15px; */
+}
+
+#uploadWrap .el-dialog {
   border-radius: 15px;
 }
 
@@ -924,6 +951,13 @@ export default defineComponent({
 .uploadDialog .video .el-upload-list__item {
   width: 200px;
   height: 30px;
+}
+
+.previewImg .el-dialog__header {
+  padding: 0;
+}
+.previewImg .el-dialog__body {
+  padding: 0;
 }
 </style>
 <style scoped>
